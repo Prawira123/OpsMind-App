@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tenant_invitatiions', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
-            $table->foreignId('invited_by')->constrained('users')->cascadeOnDelete();
-            $table->string('email');
-            $table->string('role');
-            $table->string('token');
-            $table->enum('status', ['pending', 'accepted', 'expired'])->default('pending');
-            $table->date('expires_at');
-            $table->date('accepted_at')->nullable();
+            $table->string('name');
+            $table->string('type');
+            $table->string('color')->default('#000000')->nullable();
+            $table->string('icon')->nullable();
+            $table->boolean('is_default')->default(true);
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tenant_users');
+        Schema::dropIfExists('categories');
     }
 };

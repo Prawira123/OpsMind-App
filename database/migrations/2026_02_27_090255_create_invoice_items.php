@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subscription_plans', function (Blueprint $table) {
+        Schema::create('invoice_items', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('invoice_id')->constrained('invoices')->cascadeOnDelete();
             $table->string('name');
-            $table->string('slug')->unique();
+            $table->text('description')->nullable();
+            $table->decimal('quantity', 8, 2);
             $table->decimal('price', 8, 2);
-            $table->string('billing_cycle');
-            $table->json('features');
-            $table->integer('max_users');
-            $table->boolean('is_active')->default(true);
+            $table->decimal('total', 8, 2);
+            $table->timestamps();
         });
     }
 
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subscription_plans');
+        Schema::dropIfExists('invoice_items');
     }
 };

@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tenant_invitatiions', function (Blueprint $table) {
+        Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
-            $table->foreignId('invited_by')->constrained('users')->cascadeOnDelete();
-            $table->string('email');
-            $table->string('role');
-            $table->string('token');
-            $table->enum('status', ['pending', 'accepted', 'expired'])->default('pending');
-            $table->date('expires_at');
-            $table->date('accepted_at')->nullable();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->string('company')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tenant_users');
+        Schema::dropIfExists('invoices');
     }
 };

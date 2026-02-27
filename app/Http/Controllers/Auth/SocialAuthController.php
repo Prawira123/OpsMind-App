@@ -10,13 +10,28 @@ use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
-{
+{   
+    protected $allowedProviders = ['google', 'github'];
     public function redirect($provider){
+
+        if(!in_array($provider, $this->allowedProviders)){
+            abort(404);
+        }
         return Socialite::driver($provider)->stateless()->redirect();
     }
 
     public function callback($provider){
-        $socialiteUser = Socialite::driver($provider)->stateless()->user();
+        if(!in_array($provider, $this->allowedProviders)){
+            abort(404);
+        }   
+        
+        try{
+            $socialiteUser = Socialite::driver($provider)->stateless()->user();
+        }catch(\Exception $e){
+            return redirect()->route('login')
+            ->with('error', 'There was an error with your '.$provider.' account, please try again.');
+        }
+
         $user = User::where('email', $socialiteUser->getEmail())->first();
 
         if($user){

@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->string('order_id');
+            $table->enum('status', ['pending', 'active','expired', 'cancelled', 'failed'])->default('pending');
+            $table->date('starts_at');
+            $table->date('ends_at');
+            $table->date('paid_at');
+            $table->string('payment_method');
+            $table->string('snap_token')->nullable();
             $table->timestamps();
         });
     }

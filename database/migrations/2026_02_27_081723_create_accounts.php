@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subscription_plans', function (Blueprint $table) {
+        Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->string('name');
-            $table->string('slug')->unique();
-            $table->decimal('price', 8, 2);
-            $table->string('billing_cycle');
-            $table->json('features');
-            $table->integer('max_users');
+            $table->enum('type', ['cash', 'bank','ewallet'])->default('cash');
+            $table->decimal('balance', 8, 2)->default(0);
+            $table->string('bank_name')->nullable();
+            $table->string('account_number')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamps();
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subscription_plans');
+        Schema::dropIfExists('transactions');
     }
 };

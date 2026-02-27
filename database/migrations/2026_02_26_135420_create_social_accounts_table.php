@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('social_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->string('provider');
+            $table->string('provider_id');
+            $table->string('avatar')->nullable();
             $table->timestamps();
         });
     }
