@@ -7,12 +7,15 @@ use App\Models\Tenant;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+
 class ChartOfAccountsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     // database/seeders/ChartOfAccountsSeeder.php
+
+    use WithoutModelEvents;
 
     public function run(Tenant $tenant): void
     {
