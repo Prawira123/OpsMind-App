@@ -30,7 +30,7 @@ class AuthService extends BaseService
 
     public function handleSocialLogin( $provider){
         try{
-            $socialiteUser = Socialite::driver($provider)->stateless()->user();
+            $socialiteUser = Socialite::driver($provider)->user();
         }catch(\Exception $e){
             throw new \Exception('OAuth ' . $provider . ' gagal: ' . $e->getMessage());
         }

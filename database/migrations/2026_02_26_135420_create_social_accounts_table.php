@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('provider_id');
             $table->string('avatar')->nullable();
             $table->timestamps();
+            $table->index('user_id');
         });
     }
 

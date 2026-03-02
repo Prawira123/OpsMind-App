@@ -19,7 +19,7 @@ class SocialAuthController extends Controller
         if(!in_array($provider, $this->allowedProviders)){
             abort(404);
         }
-        return Socialite::driver($provider)->stateless()->redirect();
+        return Socialite::driver($provider)->redirect();
     }
 
     public function callback($provider, AuthService $service){

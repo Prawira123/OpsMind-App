@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('icon')->nullable();
             $table->boolean('is_default')->default(true);
             $table->timestamps();
+            $table->index('tenant_id');
         });
     }
 

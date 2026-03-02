@@ -26,6 +26,7 @@ return new class extends Migration
             $table->text('notes');
             $table->string('public_token')->nullable();            
             $table->timestamps();
+            $table->index(['tenant_id', 'created_by', 'status']);
         });
     }
 

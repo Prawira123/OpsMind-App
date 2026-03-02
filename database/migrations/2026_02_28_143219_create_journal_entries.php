@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('source')->default('manual');
             // manual, transaction, invoice, subscription
             $table->timestamps();
+            $table->index(['tenant_id', 'created_by', 'status']);
         });
 
         Schema::create('journal_entry_lines', function (Blueprint $table) {

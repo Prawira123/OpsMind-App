@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('reference_no')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->index(['tenant_id', 'created_by', 'date']);
         });
     }
 

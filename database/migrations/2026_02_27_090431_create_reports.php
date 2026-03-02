@@ -20,6 +20,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'processing', 'ready', 'failed'])->default('pending');
             $table->string('file_path')->nullable();
             $table->timestamps();
+            $table->index('tenant_id');
         });
     }
 

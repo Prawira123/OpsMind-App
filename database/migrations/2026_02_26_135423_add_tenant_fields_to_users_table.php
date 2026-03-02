@@ -17,6 +17,7 @@ return new class extends Migration
             $table->boolean('two_factor_enabled')->default(false);
             $table->string('two_factor_secret')->nullable();
             $table->softDeletes();
+            $table->index('tenant_id');
         });
     }
 

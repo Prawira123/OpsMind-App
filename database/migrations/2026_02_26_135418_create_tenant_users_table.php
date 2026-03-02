@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tenant_invitatiions', function (Blueprint $table) {
+        Schema::create('tenant_invitations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->foreignId('invited_by')->constrained('users')->cascadeOnDelete();
@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('expires_at');
             $table->date('accepted_at')->nullable();
             $table->timestamps();
+            $table->index('tenant_id');
         });
     }
 

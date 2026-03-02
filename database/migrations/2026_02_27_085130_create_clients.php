@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('company')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->index('tenant_id');
         });
     }
 

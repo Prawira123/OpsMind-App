@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('snap_token')->nullable();
             $table->timestamps();
+            $table->index(['tenant_id', 'status']);
         });
     }
 

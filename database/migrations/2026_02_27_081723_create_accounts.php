@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('account_number')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->index('tenant_id');
         });
     }
 

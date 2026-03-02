@@ -28,6 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['tenant_id', 'code']); // kode unik per tenant
+            $table->index('tenant_id');
         });
     }
 

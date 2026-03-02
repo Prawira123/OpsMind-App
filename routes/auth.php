@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\OTPController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -39,6 +40,7 @@ Route::middleware('guest')->group(function () {
     //OAuth Route
     Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect']);
     Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
+
 });
 
 Route::middleware('auth')->group(function () {
@@ -55,6 +57,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
+
+    //OTP Code 
+    Route::get('/auth/otp/{type}', [OTPController::class, 'create'])->name('otp.verify');
+    Route::post('/auth/otp/{type}', [OTPController::class, 'store'])->name('otp.store');    
+    Route::post('/auth/otp/resend/{type}', [OTPController::class, 'resendCode'])->name('otp.resend');    
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 

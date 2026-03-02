@@ -258,7 +258,7 @@ class TenantSeeder extends Seeder
         foreach ($accounts as $account) {
             // Cari account_type berdasarkan category
             // Kolom 'category' di tabel account_types: asset, liability, equity, revenue, expense
-            $accountType = AccountType::where('category', $account['category'])->first();
+            $accountType = AccountType::where('category', $account['type'])->first();
 
             $coa = ChartOfAccount::create([
                 'tenant_id'       => $this->tenant->id,  // ✅ $this->tenant

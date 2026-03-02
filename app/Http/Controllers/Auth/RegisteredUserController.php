@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RegisterRequest;
-use App\Models\Tenant;
-use App\Models\User;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Services\AuthService;
+use App\Services\OTPService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,21 +27,21 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(RegisterRequest $request, AuthService $service): RedirectResponse
+    public function store(RegisterRequest $request, AuthService $service, OTPService $generateOTP): RedirectResponse
     {
-        $request->validate($request->all());
-
         $user = $service->register( [
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
-            'business_name' => $request->bussiness_name,
+            'business_name' => $request->business_name,
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        $generateOTP->generate($user, 'email_verification');
+
+        return redirect()->route('otp.verify', ['type' => 'email_verification']);
     }
 }

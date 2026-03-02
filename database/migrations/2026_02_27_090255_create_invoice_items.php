@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('price', 8, 2);
             $table->decimal('total', 8, 2);
             $table->timestamps();
+            $table->index('invoice_id');
         });
     }
 

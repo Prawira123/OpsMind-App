@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OTPCode extends Model
 {
+    protected $table = 'otp_codes';
     protected $fillable = [
         'user_id',
         'code',
@@ -18,6 +19,13 @@ class OTPCode extends Model
         'expires_at' => 'datetime',
         'is_used' => 'boolean',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query
+            ->where('is_used', false)
+            ->where('expires_at', '>', now());
+    }
 
     public function user(){
         $this->belongsTo(User::class);
