@@ -7,22 +7,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Spatie\Multitenancy\Jobs\TenantAware;
-
-
-class OtpNotification extends Notification implements ShouldQueue, TenantAware
+class OtpNotification extends Notification implements ShouldQueue
 {
     use Queueable;
-
-    public ?int $tenantId = null;
 
     /**
      * Create a new notification instance.
      */
     public function __construct(public OTPCode $otp)
     {
-        $this->tenantId = $otp->user->tenant_id;
-
     }
 
     /**
@@ -39,13 +32,13 @@ class OtpNotification extends Notification implements ShouldQueue, TenantAware
      * Get the mail representation of the notification.
      */
     public function toMail(object $notifiable): MailMessage
-    {   
-        $typeLabel = match($this->otp->type){
+    {
+        $typeLabel = match ($this->otp->type) {
             'email_verification' => 'Verifikasi Email',
-            'forgot_password'    => 'Reset Password',
-            'two_factor'         => 'Login Dua Faktor',
-            'sensitive_action'   => 'Konfirmasi Aksi',
-            default              => 'Verifikasi',
+            'forgot_password' => 'Reset Password',
+            'two_factor' => 'Login Dua Faktor',
+            'sensitive_action' => 'Konfirmasi Aksi',
+            default => 'Verifikasi',
         };
 
         return (new MailMessage)

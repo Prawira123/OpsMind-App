@@ -58,11 +58,25 @@ const onInput = (event) => {
 
 // SUBMIT
 const submit = () => {
-    form.post(route('otp.store', { type: props.type }), {
-        onError: () => {
-            form.code = ''
-        }
-    })
+    if(props.type === 'forgot_password'){
+        form.post(route('otp.store.guest', { type: props.type }), {
+            onError: () => {
+                form.code = ''
+            }
+        })
+    }else if(props.type === 'two_factor'){
+        form.post(route('otp.store.guest', { type: props.type }), {
+            onError: () => {
+                form.code = ''
+            }
+        })
+    }else{
+        form.post(route('otp.store', { type: props.type }), {
+            onError: () => {
+                form.code = ''
+            }
+        })
+    }
 }
 
 // RESEND
@@ -70,11 +84,25 @@ const resend = () => {
     if (!canResend.value || resending.value) return
     resending.value = true
     form.code = ''
-    form.post(route('otp.resend', { type: props.type }), {
-        preserveState: true,
-        onSuccess: () => startCountdown(),
-        onFinish:  () => { resending.value = false }
-    })
+    if(props.type === 'forgot_password'){
+        form.post(route('otp.resend.guest', { type: props.type }), {
+            preserveState: true,
+            onSuccess: () => startCountdown(),
+            onFinish:  () => { resending.value = false }
+        })
+    }else if(props.type === 'two_factor'){
+        form.post(route('otp.resend.guest', { type: props.type }), {
+            preserveState: true,
+            onSuccess: () => startCountdown(),
+            onFinish:  () => { resending.value = false }
+        })
+    }else{
+        form.post(route('otp.resend', { type: props.type }), {
+            preserveState: true,
+            onSuccess: () => startCountdown(),
+            onFinish:  () => { resending.value = false }
+        })
+    }
 }
 </script>
 
@@ -115,7 +143,7 @@ const resend = () => {
             <div
                 v-if="$page.props.flash?.success"
                 class="mb-4 rounded-lg border border-green-200
-                       bg-green-50 p-3 text-center text-sm text-white"
+                       bg-green-50 p-3 text-center text-sm text-green-600"
             >
                 ✓ {{ $page.props.flash.success }}
             </div>

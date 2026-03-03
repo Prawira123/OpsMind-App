@@ -31,10 +31,6 @@ class OTPService extends BaseService
             'is_used' => false
         ]);
 
-        if ($user->tenant) {
-            $user->tenant->makeCurrent();
-        }
-
         $user->notify(new OtpNotification($otp));
 
         return $otp;
@@ -42,7 +38,6 @@ class OTPService extends BaseService
 
     public function verify(User $user, string $code, string $type)
     {
-
         $otp = OTPCode::where('user_id', $user->id)
             ->where('code', $code)
             ->where('type', $type)
@@ -57,6 +52,12 @@ class OTPService extends BaseService
         $otp->update([
             'is_used' => true
         ]);
+
+        if($type === 'email_verification'){
+            $user->update([
+                'email_verified_at' => now()
+            ]);
+        }
 
         return true;
     }

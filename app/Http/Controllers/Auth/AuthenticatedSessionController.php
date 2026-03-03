@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Services\OTPService;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,9 +28,22 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request, OTPService $service): RedirectResponse
     {
         $request->authenticate();
+
+        $user = Auth::user();
+
+        if($user->two_factor_enabled){
+            Auth::logout();
+
+            session(['two_factor_user_id' => $user->id]);
+            session(['two_factor_email' => $user->email]);
+
+            $service->generate($user, 'two_factor');
+
+            return redirect()->route('password.otp', ['type' => 'two_factor']);
+        };
 
         $request->session()->regenerate();
 

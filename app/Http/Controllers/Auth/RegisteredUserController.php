@@ -29,16 +29,19 @@ class RegisteredUserController extends Controller
      */
     public function store(RegisterRequest $request, AuthService $service, OTPService $generateOTP): RedirectResponse
     {
-        $user = $service->register( [
+        $user = $service->register([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
             'business_name' => $request->business_name,
         ]);
 
+        // refresh user agar tenant_id dan semua relasi terbaru tersedia
+        $user->refresh();
+
         event(new Registered($user));
 
-        Auth::login($user);
+        Auth::login($user); 
 
         $generateOTP->generate($user, 'email_verification');
 

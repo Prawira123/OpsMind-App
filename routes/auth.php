@@ -41,6 +41,18 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect']);
     Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
 
+    //forgot_pass OTP
+    Route::get('/otp/{type}', [OTPController::class, 'create'])
+        ->name('password.otp')
+        ->whereIn('type', ['forgot_password', 'two_factor']);
+
+    Route::post('/otp/{type}', [OTPController::class, 'store'])
+        ->name('otp.store.guest')
+        ->whereIn('type', ['forgot_password', 'two_factor']);
+
+    Route::post('/otp/{type}/resend', [OTPController::class, 'resendCode'])
+        ->name('otp.resend.guest')
+        ->whereIn('type', ['forgot_password', 'two_factor']); 
 });
 
 Route::middleware('auth')->group(function () {
@@ -59,9 +71,12 @@ Route::middleware('auth')->group(function () {
         ->name('password.confirm');
 
     //OTP Code 
-    Route::get('/auth/otp/{type}', [OTPController::class, 'create'])->name('otp.verify');
-    Route::post('/auth/otp/{type}', [OTPController::class, 'store'])->name('otp.store');    
-    Route::post('/auth/otp/resend/{type}', [OTPController::class, 'resendCode'])->name('otp.resend');    
+    Route::get('/auth/otp/{type}', [OTPController::class, 'create'])->name('otp.verify')
+        ->whereIn('type', ['email_verification']);
+    Route::post('/auth/otp/{type}', [OTPController::class, 'store'])->name('otp.store')
+        ->whereIn('type', ['email_verification']);    
+    Route::post('/auth/otp/resend/{type}', [OTPController::class, 'resendCode'])->name('otp.resend')
+        ->whereIn('type', ['email_verification']);  
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
