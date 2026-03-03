@@ -21,9 +21,7 @@ const typeLabel = computed(() => ({
     'sensitive_action'   : 'Konfirmasi Aksi',
 }[props.type] ?? 'Verifikasi OTP'))
 
-// =========================================================
 // COUNTDOWN TIMER
-// =========================================================
 const countdown = ref(60)
 const canResend  = computed(() => countdown.value === 0)
 const resending  = ref(false)
@@ -52,17 +50,13 @@ onUnmounted(() => {
     if (countdownInterval) clearInterval(countdownInterval)
 })
 
-// =========================================================
 // HANYA IZINKAN ANGKA
-// =========================================================
 const onInput = (event) => {
     // Hapus semua karakter selain angka
     form.code = event.target.value.replace(/\D/g, '').slice(0, 6)
 }
 
-// =========================================================
 // SUBMIT
-// =========================================================
 const submit = () => {
     form.post(route('otp.store', { type: props.type }), {
         onError: () => {
@@ -71,9 +65,7 @@ const submit = () => {
     })
 }
 
-// =========================================================
 // RESEND
-// =========================================================
 const resend = () => {
     if (!canResend.value || resending.value) return
     resending.value = true

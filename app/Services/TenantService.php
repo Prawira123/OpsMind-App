@@ -25,7 +25,7 @@ class TenantService extends BaseService
         ]);
 
         $user->update([
-            'tenant_id' => $tenant->id
+            'tenant_id' => $tenant->id,
         ]);
         $user->assignRole('owner');
         $seeder = new TenantSeeder($tenant);

@@ -22,7 +22,6 @@ class AuthService extends BaseService
             'password' => $data['password'],
         ]);
     
-
         $this->tenantService->createForUser($user, $data['business_name']);
 
         return $user;

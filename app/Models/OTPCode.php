@@ -27,7 +27,8 @@ class OTPCode extends Model
             ->where('expires_at', '>', now());
     }
 
-    public function user(){
-        $this->belongsTo(User::class);
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

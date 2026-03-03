@@ -7,17 +7,22 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Spatie\Multitenancy\Jobs\TenantAware;
 
-class OtpNotification extends Notification
+
+class OtpNotification extends Notification implements ShouldQueue, TenantAware
 {
     use Queueable;
+
+    public ?int $tenantId = null;
 
     /**
      * Create a new notification instance.
      */
     public function __construct(public OTPCode $otp)
     {
-        //
+        $this->tenantId = $otp->user->tenant_id;
+
     }
 
     /**

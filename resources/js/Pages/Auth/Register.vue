@@ -42,8 +42,8 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.name" />
             </div>
             
-            <div>
-                <InputLabel for="business_name" value="business_name" />
+            <div class="mt-4">
+                <InputLabel for="business_name" value="Business Name" />
 
                 <TextInput
                     id="business_name"

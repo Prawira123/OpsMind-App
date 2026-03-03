@@ -27,9 +27,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'email_verified_at',
         'is_active',           // apakah akun aktif
         'two_factor_enabled',  // apakah 2FA diaktifkan
         'two_factor_secret',   // kunci 2FA (dienkripsi)
+        'tenant_id',
     ];
 
     /**
@@ -61,27 +63,30 @@ class User extends Authenticatable
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-        ->logOnly(['name', 'email', 'is_active', 'two_factor_enabled'])
-        ->logOnlyDirty()
-        ->dontSubmitEmptyLogs()
-        ->setDescriptionForEvent(fn(string $eventName) => match($eventName){
-            'created' => 'User baru telah didaftarkan',
-            'updated' => 'User telah diperbarui',
-            'deleted' => 'User telah dihapus',
-            default => "user {$eventName}",
-        });
+            ->logOnly(['name', 'email', 'is_active', 'two_factor_enabled'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
+                'created' => 'User baru telah didaftarkan',
+                'updated' => 'User telah diperbarui',
+                'deleted' => 'User telah dihapus',
+                default => "user {$eventName}",
+            });
     }
 
-    public function is_verified():bool{
+    public function is_verified(): bool
+    {
         return $this->email_verified_at !== null;
     }
 
-    public function isOwner(){
+    public function isOwner()
+    {
         return $this->hasRole('owner');
     }
 
-    public function Otp_codes(){
-        $this->hasMany(OTPCode::class);
+    public function Otp_codes()
+    {
+        return $this->hasMany(OTPCode::class);
     }
 
     public function socialAccounts()
@@ -103,5 +108,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Invoice::class);
     }
-    
+
 }

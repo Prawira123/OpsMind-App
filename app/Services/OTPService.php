@@ -13,11 +13,12 @@ class OTPService extends BaseService
 
     }
 
-    public function generate(User $user, string $type){
+    public function generate(User $user, string $type)
+    {
         OTPCode::where('user_id', $user->id)
-        ->where('type', $type)
-        ->where('is_used', false)
-        ->delete();
+            ->where('type', $type)
+            ->where('is_used', false)
+            ->delete();
 
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
@@ -30,21 +31,26 @@ class OTPService extends BaseService
             'is_used' => false
         ]);
 
+        if ($user->tenant) {
+            $user->tenant->makeCurrent();
+        }
+
         $user->notify(new OtpNotification($otp));
 
         return $otp;
     }
 
-    public function verify(User $user, string $code, string $type){
-        
-        $otp = OTPCode::where('user_id', $user->id)
-        ->where('code', $code)
-        ->where('type', $type)
-        ->active()
-        ->latest()
-        ->first();
+    public function verify(User $user, string $code, string $type)
+    {
 
-        if(!$otp){
+        $otp = OTPCode::where('user_id', $user->id)
+            ->where('code', $code)
+            ->where('type', $type)
+            ->active()
+            ->latest()
+            ->first();
+
+        if (!$otp) {
             return false;
         }
 
@@ -53,5 +59,5 @@ class OTPService extends BaseService
         ]);
 
         return true;
-    }   
+    }
 }
