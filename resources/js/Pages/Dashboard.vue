@@ -1,12 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AppLayout from '@/Layouts/AppLayoutStatic.vue';
 import { Head } from '@inertiajs/vue3';
+import AppLayoutStatic from '@/Layouts/AppLayoutStatic.vue';
 </script>
 
 <template>
-    <Head title="Dashboard" />
 
-    <AuthenticatedLayout>
+    <!-- <AuthenticatedLayout>
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
@@ -26,5 +27,14 @@ import { Head } from '@inertiajs/vue3';
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AuthenticatedLayout> -->
+
+    <AppLayoutStatic title="Dashboard">
+        <div class="rounded-xl bg-white dark:bg-gray-900 p-6
+                    border border-gray-200 dark:border-gray-800">
+            <p class="text-gray-600 dark:text-gray-400">
+                Konten dashboard akan ada di sini.
+            </p>
+        </div>
+    </AppLayoutStatic>
 </template>

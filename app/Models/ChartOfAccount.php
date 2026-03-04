@@ -3,13 +3,25 @@
 namespace App\Models;
 
 use App\Models\AccountType;
+use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class ChartOfAccount extends Model
 {
-     use LogsActivity;
+    use LogsActivity;
+
+    public static function booted(): void{
+        static::addGlobalScope(new TenantScope());
+
+        static::creating(function($model){
+            if(Auth::check() && Auth::user()->tenant_id){
+                $model->tenant_id = Auth::user()->tenant_id;
+            }
+        });
+    }
 
     protected $fillable = [
         'tenant_id',

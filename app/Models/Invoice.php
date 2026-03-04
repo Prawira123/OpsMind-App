@@ -3,12 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Scopes\TenantScope;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Invoice extends Model
 {
     use LogsActivity;
+
+    public static function booted(): void{
+        static::addGlobalScope(new TenantScope());
+
+        static::creating(function($model){
+            if(Auth::check() && Auth::user()->tenant_id){
+                $model->tenant_id = Auth::user()->tenant_id;
+            }
+        });
+    }
 
     protected $fillable = [
         'tenant_id', 'client_id', 'created_by', 'number', 'issue_date', 'due_date', 'tax', 'status','total', 'subtotal', 'notes', 'public_token'

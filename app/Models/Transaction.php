@@ -8,10 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use App\Models\Scopes\TenantScope;
+use Illuminate\Support\Facades\Auth;
 
 class Transaction extends Model
 {
     use LogsActivity, SoftDeletes;
+
+    public static function booted(): void{
+        static::addGlobalScope(new TenantScope());
+
+        static::creating(function($model){
+            if(Auth::check() && Auth::user()->tenant_id){
+                $model->tenant_id = Auth::user()->tenant_id;
+            }
+        });
+    }
 
     protected $fillable = [
         'tenant_id', 'category_id', 'accounts_id', 'created_by', 'type', 'description', 'amount', 'date', 'reference_no'

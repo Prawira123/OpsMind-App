@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('chart_of_accounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('account_type_id')->constrained();
-            $table->foreignId('parent_id')->nullable()->constrained('chart_of_accounts');
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('account_type_id')->constrained('account_types')->cascadeOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('chart_of_accounts')->cascadeOnDelete();
             // parent_id untuk sub-akun, contoh:
             // Beban (5000) → Beban Operasional (5100) → Beban Gaji (5110)
             $table->string('code');        

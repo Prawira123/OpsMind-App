@@ -167,7 +167,7 @@ const resend = () => {
                         autofocus
                         :class="[
                             'w-full rounded-lg border px-4 py-3 text-center',
-                            'text-2xl font-bold tracking-widest text-gray-900',
+                            'text-xl font-bold tracking-widest text-gray-900',
                             'transition focus:outline-none focus:ring-2',
                             form.errors.code
                                 ? 'border-red-400 bg-red-50 focus:ring-red-200'
@@ -215,7 +215,7 @@ const resend = () => {
                 </button>
 
                 <!-- RESEND -->
-                <div class="text-center text-sm text-gray-600">
+                <div class="text-center text-sm text-gray-600 dark:text-gray-200">
                     Tidak menerima kode?
 
                     <!-- Timer -->
@@ -242,7 +242,7 @@ const resend = () => {
                 <!-- KEMBALI KE LOGIN -->
                 <div class="text-center">
                     <a :href="route('login')"
-                       class="text-sm text-gray-500 hover:text-gray-700
+                       class="text-sm text-gray-500 dark:text-gray-200 hover:text-gray-400
                               hover:underline">
                         ← Kembali ke login
                     </a>
