@@ -19,7 +19,7 @@ class AccountService extends BaseService
             'tenant_id' => $data['tenant_id'],
             'name' => $data['name'],
             'type' => $data['type'],
-            'is_active' => true,
+            'is_active' => $data['is_active'],
             'balance' => $data['balance'],
             'bank_name' => $data['bank_name'],
             'account_number' => $data['account_number'],
@@ -35,7 +35,7 @@ class AccountService extends BaseService
         $this->account->update([
             'name' => $data['name'],
             'type' => $data['type'],
-            'is_active' => true,
+            'is_active' => $data['is_active'],
             'balance' => $data['balance'],
             'bank_name' => $data['bank_name'],
             'account_number' => $data['account_number'],
@@ -45,6 +45,12 @@ class AccountService extends BaseService
     }
 
     public function delete($id){
-        $this->account->find($id)->delete();
+        $account = $this->account->find((int) $id);
+
+        if (!$account) {
+            throw new \Exception("Rekening dengan id {$id} tidak ditemukan");
+        }
+
+        $account->delete();
     }
 }

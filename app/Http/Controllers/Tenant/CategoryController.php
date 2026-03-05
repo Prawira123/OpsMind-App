@@ -8,21 +8,23 @@ use App\Http\Requests\Category\CategoryUpdateRequest;
 use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
+use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function index(){
         $categories = Category::all();
 
-        return redirect()->route('categories.index', compact('categories'));
+        return Inertia::render('Category/index', ['categories' => $categories]);
     }
 
     public function create(){
-        return view('tenant.categories.create');
+        return Inertia::render('Category/create');
     }
 
     public function store(CategoryStoreRequest $request, CategoryService $service){
-        $request->validated($request->all());
+        $request->validated();
 
         $service->store([
             'tenant_id' => Auth::user()->tenant_id,
@@ -36,11 +38,11 @@ class CategoryController extends Controller
     }
 
     public function edit(Category $category){
-        return redirect()->route('categories.edit', compact('category'));
+        return Inertia::render('Category/edit', compact('category'));
     }
 
     public function update(CategoryUpdateRequest $request, CategoryService $service, $id){
-        $request->validated($request->all());
+        $request->validated();
 
         $service->update([
             'id' => $id,
@@ -57,5 +59,17 @@ class CategoryController extends Controller
         $service->delete($id);
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus');
+    }
+
+    public function bulkDestroy(Request $request, categoryService $service) 
+    {   
+        $ids = $request::input('ids', []);
+            
+        foreach ($ids as $id) {
+            $service->delete($id);
+        }
+
+        return redirect()->route('categories.index')
+                        ->with('success', count($ids) . ' kategori berhasil dihapus');
     }
 }

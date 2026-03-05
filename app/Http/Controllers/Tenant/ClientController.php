@@ -8,19 +8,20 @@ use App\Http\Requests\Client\ClientUpdateRequest;
 use App\Models\Client;
 use App\Services\ClientService;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class ClientController extends Controller
 {
     public function index(){
-        return redirect()->route('clients.index');
+        return Inertia::render('Tenant/Clients/Index');
     }
 
     public function create(){
-        return redirect()->route('clients.create');
+        return Inertia::render('Tenant/Clients/Create');
     }
 
     public function store(ClientStoreRequest $request, ClientService $service){
-        $request->validated($request->all());
+        $request->validated();
 
         $service->store([
             'tenant_id' => Auth::user()->tenant_id,
@@ -35,11 +36,11 @@ class ClientController extends Controller
     }
 
     public function edit(Client $client){
-        return redirect()->route('clients.edit', compact('client'));
+        return Inertia::render('Tenant/Clients/Edit', compact('client'));
     }
 
     public function update(ClientUpdateRequest $request, Client $client, ClientService $service){
-        $request->validated($request->all());
+        $request->validated();
 
         $service->update([
             'id' => $client->id,

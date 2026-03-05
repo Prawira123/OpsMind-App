@@ -1,13 +1,12 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Tenant\AccountController;
 use App\Http\Controllers\Tenant\CategoryController;
 use App\Http\Controllers\Tenant\ChartOfAccountController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use OpenAI\Enums\Moderations\Category;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -31,22 +30,21 @@ Route::get('/', function () {
 // })->middleware(['auth', 'setCurrentTenant']);
 
 Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant'])->group(function(){
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     //Account Route
-    Route::resource('accounts', AccountController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
-    //Category Route
-    Route::resource('categories', CategoryController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
-    //Chart of accounts Route
-    Route::resource('chart-of-accounts', ChartOfAccountController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
-}) ;
+    Route::delete('accounts/bulk-destroy', [AccountController::class, 'bulkDestroy'])
+     ->name('accounts.bulk-destroy');
+    Route::resource('accounts', AccountController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    //Category Route
+    Route::delete('categories/bulk-destroy', [CategoryController::class, 'bulkDestroy'])
+    ->name('categories.bulk-destroy');
+    Route::resource('categories', CategoryController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+
+    //Chart of accounts Route
+    Route::resource('chart-of-accounts', ChartOfAccountController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+    
 });
 
 require __DIR__.'/auth.php';

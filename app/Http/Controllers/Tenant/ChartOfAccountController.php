@@ -9,24 +9,25 @@ use App\Models\AccountType;
 use App\Models\ChartOfAccount;
 use App\Services\ChartOfAccountService;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class ChartOfAccountController extends Controller
 {
     public function index(){
         $chartOfAccounts = ChartOfAccount::all();
 
-        return redirect()->route('chart-of-accounts.index', compact('chartOfAccounts'));
+        return Inertia::render('Tenant/ChartOfAccounts/Index', compact('chartOfAccounts'));
     }
 
     public function create(){
         $accountTypes = AccountType::all();
         $chartOfAccounts = ChartOfAccount::all();
 
-        return view('tenant.chart-of-accounts.create', compact('accountTypes', 'chartOfAccounts'));
+        return Inertia::render('Tenant/ChartOfAccounts/Create', compact('accountTypes', 'chartOfAccounts'));
     }
 
     public function store(ChartOfAccountStoreRequest $request, ChartOfAccountService $service){
-        $request->validated($request->all());
+        $request->validated();
 
         $service->store([
             'tenant_id' => Auth::user()->tenant_id,
@@ -45,11 +46,11 @@ class ChartOfAccountController extends Controller
         $accountTypes = AccountType::all();
         $chartOfAccounts = ChartOfAccount::all();
 
-        return view('tenant.chart-of-accounts.edit', compact('chartOfAccount', 'accountTypes', 'chartOfAccounts'));
+        return Inertia::render('Tenant/ChartOfAccounts/Edit', compact('chartOfAccount', 'accountTypes', 'chartOfAccounts'));
     }
 
     public function update(ChartOfAccountService $service, ChartOfAccountUpdateRequest $request, $id){
-        $request->validated($request->all());
+        $request->validated();
 
         $service->update([
             'id' => $id,

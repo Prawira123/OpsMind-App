@@ -8,21 +8,23 @@ use App\Http\Requests\Account\AccountUpdateRequest;
 use App\Models\Account;
 use App\Services\AccountService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
+use Inertia\Inertia;
 
 class AccountController extends Controller
 {
     public function index(){
         $accounts = Account::all();
 
-        return redirect()->route('accounts.index', compact('accounts'));
+        return Inertia::render('Account/index', compact('accounts'));
     }
 
     public function create(){
-        return view('tenant.accounts.create');
+        return Inertia::render('Account/create');
     }
 
     public function store(AccountStoreRequest $request, AccountService $service){
-        $request->validated($request->all());
+        $request->validated();
 
         $service->store([
             'tenant_id' => Auth::user()->tenant_id,
@@ -31,17 +33,18 @@ class AccountController extends Controller
             'balance' => $request->balance,
             'bank_name' => $request->bank_name,
             'account_number' => $request->account_number,
+            'is_active' => $request->is_active
         ]);
 
         return redirect()->route('accounts.index')->with('success', 'Rekening berhasil ditambahkan');
     }
 
     public function edit(Account $account){
-        return view('tenant.accounts.edit', compact('account'));
+        return Inertia::render('Account/edit', compact('account'));
     }
 
     public function update(AccountUpdateRequest $request, AccountService $service, $id){
-        $request->validated($request->all());
+        $request->validated();
 
         $account = Account::find($id);
 
@@ -52,6 +55,7 @@ class AccountController extends Controller
             'balance' => $request->balance,
             'bank_name' => $request->bank_name,
             'account_number' => $request->account_number,
+            'is_active' => $request->is_active
         ]);
 
         return redirect()->route('accounts.index')->with('success', 'Rekening berhasil diubah');
@@ -61,5 +65,17 @@ class AccountController extends Controller
         $service->delete($id);
 
         return redirect()->route('accounts.index')->with('success', 'Rekening berhasil dihapus');
+    }
+
+    public function bulkDestroy(Request $request, AccountService $service) 
+    {   
+    $ids = $request::input('ids', []);
+        
+    foreach ($ids as $id) {
+        $service->delete($id);
+    }
+
+    return redirect()->route('accounts.index')
+                        ->with('success', count($ids) . ' rekening berhasil dihapus');
     }
 }
