@@ -31,7 +31,7 @@ const tableHead = [
         { key: 'bank_name',      label: 'Bank' },
         { key: 'account_number', label: 'No. Rekening' },
         { key: 'balance',        label: 'Saldo' },
-    ]
+        { key: 'is_active',      label: 'Status' },]
 
 // SEARCH
 const search = ref('')
@@ -68,6 +68,7 @@ const columnTypes = {
     type:           'badge',
     account_number: 'mono',
     balance:        'currency',
+    is_active:      'badge',
 }
 
 // SORT

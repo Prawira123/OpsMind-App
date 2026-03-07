@@ -3,6 +3,7 @@ import { useForm, Link } from '@inertiajs/vue3'
 import SelectCard from '@/Components/Partials/SelectCard.vue';
 import TextInputForm from '@/Components/Partials/TextInputForm.vue';
 import ToggleSwitch from '@/Components/Partials/ToggleSwitch.vue';
+import ButtonSubmit from '@/Components/Partials/ButtonSubmit.vue';
 
 // FORM — field sesuai fillable di model Account
 const form = useForm({
@@ -163,10 +164,10 @@ const displayBalance = () => {
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             Nomor Rekening / Nomor HP
                         </label>
+                        <TextInputForm v-model="form.account_number" :form="form" :placeholder="'contoh: 1234567890'" :error="form.errors.account_number"/>
                         <p v-if="form.errors.account_number" class="mt-1.5 text-xs text-red-500">
                             {{ form.errors.account_number }}
                         </p>
-                        <TextInputForm v-model="form.account_number" :form="form" :placeholder="'contoh: 1234567890'" :error="form.errors.account_number"/>
                     </div>
                 </div>
 
@@ -226,25 +227,6 @@ const displayBalance = () => {
                                 Rekening nonaktif tidak bisa digunakan untuk transaksi
                             </p>
                         </div>
-                        <!-- Toggle switch -->
-                        <!-- <button
-                            type="button"
-                            @click="form.is_active = !form.is_active"
-                            :class="[
-                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer',
-                                'rounded-full border-2 border-transparent transition-colors duration-200',
-                                'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-                                form.is_active
-                                    ? 'bg-indigo-600'
-                                    : 'bg-gray-200 dark:bg-gray-700',
-                            ]"
-                        >
-                            <span :class="[
-                                'pointer-events-none inline-block h-5 w-5 rounded-full',
-                                'bg-white shadow transform transition duration-200',
-                                form.is_active ? 'translate-x-5' : 'translate-x-0',
-                            ]"/>
-                        </button> -->
                         <ToggleSwitch :form="form" />
                     </div>
                 </div>
@@ -260,29 +242,7 @@ const displayBalance = () => {
                         Batal
                     </Link>
 
-                    <button
-                        type="submit"
-                        :disabled="form.processing"
-                        class="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5
-                               text-sm font-semibold text-white shadow-sm
-                               hover:bg-indigo-700 disabled:opacity-60
-                               disabled:cursor-not-allowed transition-colors"
-                    >
-                        <!-- Spinner saat loading -->
-                        <svg v-if="form.processing"
-                             class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10"
-                                    stroke="currentColor" stroke-width="4"/>
-                            <path class="opacity-75" fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                        </svg>
-                        <svg v-else class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M5 13l4 4L19 7"/>
-                        </svg>
-                        {{ form.processing ? 'Menyimpan...' : 'Simpan Rekening' }}
-                    </button>
+                    <ButtonSubmit :btn-text="form.processing ? 'menyimpan...' : 'Kirim Data'" :form="form"/>
                 </div>
 
             </form>

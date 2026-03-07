@@ -32,6 +32,8 @@ class Subscription extends Model
         'paid_at',
         'payment_method',
         'snap_token',
+        'subs_plan_id',
+        'user_id'
     ];
 
     protected $casts = [

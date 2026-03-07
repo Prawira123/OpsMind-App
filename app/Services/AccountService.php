@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Requests\Account\AccountStoreRequest;
-use App\Http\Requests\Account\AccountUpdateRequest;
 use App\Models\Account;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +14,7 @@ class AccountService extends BaseService
     public function store(array $data){
 
         $this->account->create([
-            'tenant_id' => $data['tenant_id'],
+            'tenant_id' => Auth::user()->tenant_id,
             'name' => $data['name'],
             'type' => $data['type'],
             'is_active' => $data['is_active'],
@@ -28,9 +26,9 @@ class AccountService extends BaseService
         return $this->account;
     }
 
-    public function update(array $data){
+    public function update(array $data, $id){
 
-        $this->account = $this->account->find($data['id']);
+        $this->account = $this->account->find($id);
 
         $this->account->update([
             'name' => $data['name'],
@@ -49,6 +47,10 @@ class AccountService extends BaseService
 
         if (!$account) {
             throw new \Exception("Rekening dengan id {$id} tidak ditemukan");
+        }
+
+        if($account->balance > 0){
+            abort(403, 'Rekening masih memiliki saldo, Transfer Saldo ke Rekening Lain agar bisa menghapus Rekening ini');
         }
 
         $account->delete();

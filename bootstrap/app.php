@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'otpVerified' => \App\Http\Middleware\EnsureOtpVerified::class,
             'tenantExists' => \App\Http\Middleware\EnsureTenantExists::class,
             'setCurrentTenant' => \App\Http\Middleware\SetCurrentTenant::class,
+            'SubscriptionActive' => \App\Http\Middleware\SubscriptionMiddleware::class
         ]);
 
         //

@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AccountTypeSeeder::class,
             RoleSeeder::class,
+            SubscriptionPlanSeeder::class,
         ]);
     }
 }

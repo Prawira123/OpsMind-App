@@ -20,9 +20,9 @@ return new class extends Migration
             $table->enum('status', ['draft', 'send', 'paid', 'overdue', 'cancelled'])->default('draft');
             $table->date('issue_date');
             $table->date('due_date');
-            $table->decimal('subtotal', 8, 2);
-            $table->decimal('tax', 8, 2);
-            $table->decimal('total', 8, 2);
+            $table->decimal('subtotal', 30, 2);
+            $table->decimal('tax', 30, 2);
+            $table->decimal('total', 30, 2);
             $table->text('notes');
             $table->string('public_token')->nullable();            
             $table->timestamps();

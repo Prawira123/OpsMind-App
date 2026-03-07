@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ChartOfAccount;
+use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
 
 class ChartOfAccountService extends BaseService
@@ -13,7 +14,9 @@ class ChartOfAccountService extends BaseService
     }
 
     public function store(array $data){
+        
         $this->chartOfAccount->create([
+            'tenant_id' => Auth::user()->tenant_id,
             'account_type_id' => $data['account_type_id'],
             'parent_id' => $data['parent_id'],
             'code' => $data['code'],
@@ -25,10 +28,10 @@ class ChartOfAccountService extends BaseService
         return $this->chartOfAccount;
     }
 
-    public function update(array $data){
-        $this->chartOfAccount = $this->chartOfAccount->find($data['id']);
+    public function update(array $data, $id){
+        $chartOfAccount = $this->chartOfAccount->find($id);
 
-        $this->chartOfAccount->update([
+        $chartOfAccount->update([
             'account_type_id' => $data['account_type_id'],
             'parent_id' => $data['parent_id'],
             'code' => $data['code'],
@@ -37,10 +40,18 @@ class ChartOfAccountService extends BaseService
             'balance' => $data['balance'],
         ]);
 
-        return $this->chartOfAccount;
+        return $chartOfAccount;
     }
 
     public function delete($id){
-        $this->chartOfAccount->find($id)->delete();
+       
+        $chartOfAccount = ChartOfAccount::find($id);
+
+        if($chartOfAccount->is_default || $chartOfAccount->is_locked){
+            abort(403, 'Tidak dapat menghapus akun default atau terkunci');
+        }
+
+        $chartOfAccount->delete();
+
     }
 }

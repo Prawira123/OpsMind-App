@@ -9,17 +9,17 @@ class SubscriptionPlan extends Model
 {
     protected $fillable = [
         'name',
-        'slug',
         'price',
         'billing_cycle', // monthly, yearly
         'features',      // JSON
-        'max_users',
+        'limits',      // JSON
         'is_active',
     ];
 
     protected $casts = [
         'price'     => 'decimal:2',
         'features'  => 'array',  // JSON otomatis jadi array PHP
+        'limits'  => 'array',  // JSON otomatis jadi array PHP
         'is_active' => 'boolean',
     ];
 

@@ -4,7 +4,6 @@
     })
 </script>
 
-
 <template>
     <option :value="item.key">{{ item.value }}</option>
 </template>

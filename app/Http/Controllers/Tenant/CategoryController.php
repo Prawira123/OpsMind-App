@@ -27,7 +27,6 @@ class CategoryController extends Controller
         $request->validated();
 
         $service->store([
-            'tenant_id' => Auth::user()->tenant_id,
             'name' => $request->name,
             'type' => $request->type,
             'color' => $request->color,
@@ -42,21 +41,27 @@ class CategoryController extends Controller
     }
 
     public function update(CategoryUpdateRequest $request, CategoryService $service, $id){
-        $request->validated();
 
-        $service->update([
-            'id' => $id,
-            'name' => $request->name,
-            'type' => $request->type,
-            'color' => $request->color,
-            'icon' => $request->icon,
-        ]);
+        $category = Category::find($id);
+
+        if($category-> tenant_id !== Auth::user()->tenant_id){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+
+        $service->update($request->validated(), $category->id);
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil diubah');
     }
 
     public function destroy(CategoryService $service, $id){
-        $service->delete($id);
+        
+        $category = Category::find($id);
+
+        if($category-> tenant_id !== Auth::user()->tenant_id){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+
+        $service->delete($category->id);
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus');
     }
@@ -66,10 +71,16 @@ class CategoryController extends Controller
         $ids = $request::input('ids', []);
             
         foreach ($ids as $id) {
-            $service->delete($id);
+            $category = Category::find($id);
+
+            if($category->tenant_id !== Auth::user()->tenant_id){
+                abort(403, 'Kamu tidak Punya Akses');
+            }
+
+            $service->delete($category->id);
         }
 
         return redirect()->route('categories.index')
-                        ->with('success', count($ids) . ' kategori berhasil dihapus');
+        ->with('success', count($ids) . ' kategori berhasil dihapus');
     }
 }

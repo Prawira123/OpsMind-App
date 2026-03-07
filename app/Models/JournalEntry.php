@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\JournalEntryLine;
+use App\Models\JournalEntryDetail;
+use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use App\Models\Scopes\TenantScope;
-use Illuminate\Support\Facades\Auth;
 
 class JournalEntry extends Model
 {
@@ -26,7 +26,6 @@ class JournalEntry extends Model
     protected $fillable = [
         'tenant_id',
         'transaction_id',
-        'created_by',
         'entry_number',
         'description',
         'date',
@@ -67,7 +66,7 @@ class JournalEntry extends Model
     // Relasi ke detail baris jurnal (debit & kredit)
     public function lines()
     {
-        return $this->hasMany(JournalEntryLine::class);
+        return $this->hasMany(JournalEntryDetail::class);
     }
 
     // Helper: hitung total debit (harus selalu = total kredit)

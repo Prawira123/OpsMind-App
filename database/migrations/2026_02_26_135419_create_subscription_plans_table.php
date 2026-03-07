@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('name');
-            $table->string('slug')->unique();
-            $table->decimal('price', 8, 2);
+            $table->decimal('price', 30, 2);
             $table->string('billing_cycle');
             $table->json('features');
-            $table->integer('max_users');
+            $table->json('limits');
             $table->boolean('is_active')->default(true);
         });
     }

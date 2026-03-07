@@ -26,18 +26,18 @@ class Transaction extends Model
     }
 
     protected $fillable = [
-        'tenant_id', 'category_id', 'accounts_id', 'created_by', 'type', 'description', 'amount', 'date', 'reference_no'
+        'tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no'
     ];
 
     protected $casts = [
-        'amount' => 'float',
+        'amountTotal' => 'float',
         'date' => 'date'
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-        ->logOnly(['tenant_id', 'category_id', 'accounts_id', 'created_by', 'type', 'description', 'amount', 'date', 'reference_no'])
+        ->logOnly(['tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no'])
         ->logOnlyDirty()
         ->dontSubmitEmptyLogs()
         ->setDescriptionForEvent(fn(string $eventName) => match($eventName){
@@ -56,11 +56,16 @@ class Transaction extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function account(){
+    public function debit_account(){
         return $this->belongsTo(Account::class);
     }
-
+    public function credit_account(){
+        return $this->belongsTo(Account::class);
+    }
     public function createdBy(){
         return $this->belongsTo(User::class);
+    }
+    public function client(){
+        return $this->belongsTo(Client::class);
     }
 }

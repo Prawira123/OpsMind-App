@@ -27,17 +27,8 @@ class ChartOfAccountController extends Controller
     }
 
     public function store(ChartOfAccountStoreRequest $request, ChartOfAccountService $service){
-        $request->validated();
 
-        $service->store([
-            'tenant_id' => Auth::user()->tenant_id,
-            'name' => $request->name,
-            'account_type_id' => $request->account_type_id,
-            'parent_id' => $request->parent_id,
-            'code' => $request->code,
-            'description' => $request->description,
-            'balance' => $request->balance
-        ]);
+        $service->store($request->validated());
 
         return redirect()->route('chart-of-accounts.index')->with('success', 'Akun berhasil ditambahkan');
     }
@@ -50,22 +41,24 @@ class ChartOfAccountController extends Controller
     }
 
     public function update(ChartOfAccountService $service, ChartOfAccountUpdateRequest $request, $id){
-        $request->validated();
+        $chartOfAccount = ChartOfAccount::find($id);
 
-        $service->update([
-            'id' => $id,
-            'name' => $request->name,
-            'account_type_id' => $request->account_type_id,
-            'parent_id' => $request->parent_id,
-            'code' => $request->code,
-            'description' => $request->description,
-            'balance' => $request->balance,
-        ]);
+        if($chartOfAccount->tenant_id !== Auth::user()->tenant_id){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+
+        $service->update($request->validated(), $chartOfAccount->id);
 
         return redirect()->route('chart-of-accounts.index')->with('success', 'Akun berhasil diubah');
     }
 
     public function destroy(ChartOfAccountService $service, $id){
+        $chartOfAccount = ChartOfAccount::find($id);
+
+        if($chartOfAccount->tenant_id !== Auth::user()->tenant_id){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+
         $service->delete($id);
 
         return redirect()->route('chart-of-accounts.index')->with('success', 'Akun berhasil dihapus');

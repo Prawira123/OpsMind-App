@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Client;
+use Illuminate\Support\Facades\Auth;
 
 class ClientService extends BaseService
 {
@@ -11,8 +12,9 @@ class ClientService extends BaseService
     }
 
     public function store(array $data){
+        
         $this->client->create([
-            'tenant_id' => $data['tenant_id'],
+            'tenant_id' => Auth::user()->tenant_id,
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
@@ -23,8 +25,8 @@ class ClientService extends BaseService
         return $this->client;
     }
 
-    public function update(array $data){
-        $this->client = $this->client->find($data['id']);
+    public function update(array $data, $id){
+        $this->client = $this->client->find($id);
 
         $this->client->update([
             'name' => $data['name'],
@@ -40,5 +42,5 @@ class ClientService extends BaseService
     public function delete($id){
         return $this->client->find($id)->delete();
     }
-    
+
 }

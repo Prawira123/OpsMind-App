@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->string('name');
-            $table->enum('type', ['cash', 'bank','ewallet'])->default('cash');
+            $table->enum('type', ['cash', 'bank','ewallet','other'])->default('cash');
             $table->decimal('balance', 30, 2)->default(0);
             $table->string('bank_name')->nullable();
             $table->string('account_number')->nullable();

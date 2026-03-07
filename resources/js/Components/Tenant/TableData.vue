@@ -143,26 +143,27 @@ function getCellType(key) {
                              class="flex items-center gap-3">
                             <div :class="[
                                 'h-9 w-9 rounded-lg flex items-center justify-center shrink-0',
-                                row.type === 'cash'    && 'bg-emerald-100 dark:bg-emerald-900/30',
-                                row.type === 'bank'    && 'bg-blue-100 dark:bg-blue-900/30',
-                                row.type === 'ewallet' && 'bg-violet-100 dark:bg-violet-900/30',
-                                row.type === 'income'  && 'bg-emerald-100 dark:bg-emerald-900/30',
-                                row.type === 'expense' && 'bg-red-100 dark:bg-red-900/30',
-                                (!row.type || row.type === 'other') && 'bg-gray-100 dark:bg-gray-800',
-                            ]">
+                                !row.color && row.type === 'cash'    && 'bg-emerald-100 dark:bg-emerald-900/30',
+                                !row.color && row.type === 'bank'    && 'bg-blue-100 dark:bg-blue-900/30',
+                                !row.color && row.type === 'ewallet' && 'bg-violet-100 dark:bg-violet-900/30',
+                                !row.color && row.type === 'income'  && 'bg-emerald-100 dark:bg-emerald-900/30',
+                                !row.color && row.type === 'expense' && 'bg-rose-100 dark:bg-rose-900/30',
+                                (!row.color && (!row.type || row.type === 'other')) && 'bg-gray-100 dark:bg-gray-800',
+                            ]" :style="row.color ? { backgroundColor: row.color + '20' } : {}">
                                 <svg class="h-4 w-4"
-                                     :class="
-                                         row.type === 'cash'    ? 'text-emerald-600' :
-                                         row.type === 'bank'    ? 'text-blue-600' :
-                                         row.type === 'ewallet' ? 'text-violet-600' :
-                                         row.type === 'income'  ? 'text-emerald-600' :
-                                         row.type === 'expense' ? 'text-red-600' :
-                                         'text-gray-500'
-                                     "
+                                     :class="[
+                                         !row.color && row.type === 'cash'    ? 'text-emerald-600' :
+                                         !row.color && row.type === 'bank'    ? 'text-blue-600' :
+                                         !row.color && row.type === 'ewallet' ? 'text-violet-600' :
+                                         !row.color && row.type === 'income'  ? 'text-emerald-600' :
+                                         !row.color && row.type === 'expense' ? 'text-rose-600' :
+                                         !row.color ? 'text-gray-500' : ''
+                                     ]"
+                                     :style="row.color ? { color: row.color } : {}"
                                      fill="none" viewBox="0 0 24 24"
                                      stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                                 </svg>
                             </div>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">

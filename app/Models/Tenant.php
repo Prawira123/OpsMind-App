@@ -22,7 +22,8 @@ class Tenant extends BaseTenant
         'currency',
         'timezone',
         'is_active',
-        'user_id'
+        'user_id',
+        'subs_id'
     ];
 
     protected $casts = [

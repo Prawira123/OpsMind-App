@@ -23,10 +23,11 @@ class AccountUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'type' => 'required|in:cash,bank,ewallet',
+            'type' => 'required|in:cash,bank,ewallet,other',
             'balance' => 'required|numeric',
             'bank_name' => 'required|string|max:255',
             'account_number' => 'required|string|max:255',
+            'is_active' => 'required|boolean',
         ];
     }
 }

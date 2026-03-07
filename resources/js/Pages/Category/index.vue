@@ -19,14 +19,14 @@ const props = defineProps({
 
 // TIPE REKENING — label & style per tipe
 const categoryTypes = {
-    income:    { label: 'Income',  color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-    expense:    { label: 'Expense',       color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    income:    { label: 'Pemasukan',  color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+    expense:    { label: 'Pengeluaran',       color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
 }
 
 const tableHead = [
-        { key: 'name',           label: 'Nama Kategori' },
-        { key: 'type',           label: 'Tipe' },
-    ]
+    { key: 'name',           label: 'Nama Kategori' },
+    { key: 'type',           label: 'Tipe' },
+]
 
 // SEARCH
 const search = ref('')
@@ -41,11 +41,11 @@ const optionFilter = [
     },
     {
         key : 'income',
-        value : 'Income',
+        value : 'Pemasukan',
     },
     {
         key : 'expense',
-        value : 'Expense',
+        value : 'Pengeluaran',
     },
     
 ]

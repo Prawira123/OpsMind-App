@@ -1,16 +1,17 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3'
+import SelectCard from '@/Components/Partials/SelectCard.vue';
+import TextInputForm from '@/Components/Partials/TextInputForm.vue';
+import ToggleSwitch from '@/Components/Partials/ToggleSwitch.vue';
+import ButtonSubmit from '@/Components/Partials/ButtonSubmit.vue';
+import ButtonReset from '@/Components/Partials/ButtonReset.vue';
 
-// =========================================================
 // PROPS — dikirim dari AccountController::edit()
-// =========================================================
 const props = defineProps({
     account: Object,
 })
 
-// =========================================================
 // FORM — pre-fill dengan data yang ada
-// =========================================================
 const form = useForm({
     name:           props.account.name           ?? '',
     type:           props.account.type           ?? 'cash',
@@ -24,9 +25,7 @@ const submit = () => {
     form.put(route('accounts.update', props.account.id))
 }
 
-// =========================================================
 // TIPE REKENING
-// =========================================================
 const accountTypes = [
     {
         value: 'cash',
@@ -119,9 +118,7 @@ const displayBalance = () => {
             </div>
         </div>
 
-        <!-- ================================================ -->
         <!-- INFO PERUBAHAN (hanya di Edit) -->
-        <!-- ================================================ -->
         <div v-if="form.isDirty"
              class="mb-6 max-w-2xl flex items-center gap-3 rounded-lg
                     bg-amber-50 dark:bg-amber-900/20 border border-amber-200
@@ -138,9 +135,7 @@ const displayBalance = () => {
             </p>
         </div>
 
-        <!-- ================================================ -->
         <!-- FORM CARD -->
-        <!-- ================================================ -->
         <div class="max-w-full">
             <form @submit.prevent="submit" class="space-y-6">
 
@@ -153,45 +148,7 @@ const displayBalance = () => {
                     </h2>
 
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                        <button
-                            v-for="type in accountTypes"
-                            :key="type.value"
-                            type="button"
-                            @click="form.type = type.value"
-                            :class="[
-                                'relative flex flex-col items-center gap-2 rounded-xl border-2 p-4',
-                                'text-sm font-medium transition-all duration-150 cursor-pointer',
-                                form.type === type.value
-                                    ? type.activeColor
-                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-900',
-                            ]"
-                        >
-                            <div v-if="form.type === type.value"
-                                 class="absolute top-2 right-2 h-4 w-4 rounded-full
-                                        bg-indigo-600 flex items-center justify-center">
-                                <svg class="h-2.5 w-2.5 text-white" fill="none"
-                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-
-                            <div :class="[
-                                'h-10 w-10 rounded-lg flex items-center justify-center',
-                                type.color,
-                            ]">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                     stroke="currentColor" stroke-width="1.5"
-                                     v-html="type.icon"/>
-                            </div>
-
-                            <div class="text-center">
-                                <p class="text-xs font-semibold text-gray-900 dark:text-white">
-                                    {{ type.label }}
-                                </p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ type.desc }}</p>
-                            </div>
-                        </button>
+                        <SelectCard :form="form" :dataTypes="accountTypes"/>
                     </div>
 
                     <p v-if="form.errors.type" class="mt-2 text-xs text-red-500">
@@ -214,20 +171,7 @@ const displayBalance = () => {
                             Nama Rekening
                             <span class="text-red-500 ml-0.5">*</span>
                         </label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            placeholder="contoh: Kas Utama, BCA Operasional..."
-                            :class="[
-                                'w-full rounded-lg border px-3.5 py-2.5 text-sm',
-                                'text-gray-900 dark:text-white placeholder-gray-400',
-                                'bg-white dark:bg-gray-800 transition',
-                                'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent',
-                                form.errors.name
-                                    ? 'border-red-400 dark:border-red-500'
-                                    : 'border-gray-200 dark:border-gray-700',
-                            ]"
-                        />
+                        <TextInputForm v-model="form.name" :form="form" :placeholder="'contoh: Kas Utama, BCA Operasional...'" :error="form.errors.name"/>
                         <p v-if="form.errors.name" class="mt-1.5 text-xs text-red-500">
                             {{ form.errors.name }}
                         </p>
@@ -239,20 +183,7 @@ const displayBalance = () => {
                                       dark:text-gray-300 mb-1.5">
                             Nama Bank / Platform
                         </label>
-                        <input
-                            v-model="form.bank_name"
-                            type="text"
-                            placeholder="contoh: BCA, Mandiri, OVO, GoPay..."
-                            :class="[
-                                'w-full rounded-lg border px-3.5 py-2.5 text-sm',
-                                'text-gray-900 dark:text-white placeholder-gray-400',
-                                'bg-white dark:bg-gray-800 transition',
-                                'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent',
-                                form.errors.bank_name
-                                    ? 'border-red-400 dark:border-red-500'
-                                    : 'border-gray-200 dark:border-gray-700',
-                            ]"
-                        />
+                        <TextInputForm v-model="form.bank_name" :form="form" :placeholder="'contoh: BCA, Mandiri, OVO, GoPay...'" :error="form.errors.bank_name"/>
                         <p v-if="form.errors.bank_name" class="mt-1.5 text-xs text-red-500">
                             {{ form.errors.bank_name }}
                         </p>
@@ -264,20 +195,7 @@ const displayBalance = () => {
                                       dark:text-gray-300 mb-1.5">
                             Nomor Rekening / Nomor HP
                         </label>
-                        <input
-                            v-model="form.account_number"
-                            type="text"
-                            placeholder="contoh: 1234567890"
-                            :class="[
-                                'w-full rounded-lg border px-3.5 py-2.5 text-sm font-mono',
-                                'text-gray-900 dark:text-white placeholder-gray-400',
-                                'bg-white dark:bg-gray-800 transition',
-                                'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent',
-                                form.errors.account_number
-                                    ? 'border-red-400 dark:border-red-500'
-                                    : 'border-gray-200 dark:border-gray-700',
-                            ]"
-                        />
+                        <TextInputForm v-model="form.account_number" :form="form" :placeholder="'contoh: 1234567890'" :error="form.errors.account_number"/>
                         <p v-if="form.errors.account_number"
                            class="mt-1.5 text-xs text-red-500">
                             {{ form.errors.account_number }}
@@ -353,24 +271,7 @@ const displayBalance = () => {
                                 Rekening nonaktif tidak bisa digunakan untuk transaksi
                             </p>
                         </div>
-                        <button
-                            type="button"
-                            @click="form.is_active = !form.is_active"
-                            :class="[
-                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer',
-                                'rounded-full border-2 border-transparent transition-colors duration-200',
-                                'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-                                form.is_active
-                                    ? 'bg-indigo-600'
-                                    : 'bg-gray-200 dark:bg-gray-700',
-                            ]"
-                        >
-                            <span :class="[
-                                'pointer-events-none inline-block h-5 w-5 rounded-full',
-                                'bg-white shadow transform transition duration-200',
-                                form.is_active ? 'translate-x-5' : 'translate-x-0',
-                            ]"/>
-                        </button>
+                        <ToggleSwitch :form="form" />
                     </div>
                 </div>
 
@@ -387,40 +288,8 @@ const displayBalance = () => {
 
                     <div class="flex items-center gap-3">
                         <!-- Reset form -->
-                        <button
-                            v-if="form.isDirty"
-                            type="button"
-                            @click="form.reset()"
-                            class="rounded-lg px-4 py-2.5 text-sm font-medium
-                                   text-gray-500 dark:text-gray-400
-                                   hover:text-gray-700 dark:hover:text-gray-200
-                                   hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                        >
-                            Reset
-                        </button>
-
-                        <button
-                            type="submit"
-                            :disabled="form.processing || !form.isDirty"
-                            class="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5
-                                   text-sm font-semibold text-white shadow-sm
-                                   hover:bg-indigo-700 disabled:opacity-60
-                                   disabled:cursor-not-allowed transition-colors"
-                        >
-                            <svg v-if="form.processing"
-                                 class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"/>
-                                <path class="opacity-75" fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                            </svg>
-                            <svg v-else class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M5 13l4 4L19 7"/>
-                            </svg>
-                            {{ form.processing ? 'Menyimpan...' : 'Simpan Perubahan' }}
-                        </button>
+                        <ButtonReset :form="form"/>
+                        <ButtonSubmit :btn-text="form.processing ? 'menyimpan...' : 'Simpan Perubahan'" :form="form"/>
                     </div>
                 </div>
 

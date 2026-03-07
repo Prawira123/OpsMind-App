@@ -21,16 +21,8 @@ class ClientController extends Controller
     }
 
     public function store(ClientStoreRequest $request, ClientService $service){
-        $request->validated();
 
-        $service->store([
-            'tenant_id' => Auth::user()->tenant_id,
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'company' => $request->company
-        ]);
+        $service->store($request->validated());
 
         return redirect()->route('clients.index')->with('success', 'Pelanggan berhasil ditambahkan');
     }
@@ -40,21 +32,24 @@ class ClientController extends Controller
     }
 
     public function update(ClientUpdateRequest $request, Client $client, ClientService $service){
-        $request->validated();
 
-        $service->update([
-            'id' => $client->id,
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'company' => $request->company
-        ]);
+        if($client->tenant_id !== Auth::user()->tenant_id){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+
+        $service->update($request->validated(), $client->id);
 
         return redirect()->route('clients.index')->with('success', 'Pelanggan berhasil diubah');
     }
 
     public function destroy(ClientService $service, $id){
+        
+        $client = Client::find($id);
+
+        if($client->tenant_id !== Auth::user()->tenant_id){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+
         $service->delete($id);
 
         return redirect()->route('clients.index')->with('success', 'Pelanggan berhasil dihapus');
