@@ -21,7 +21,14 @@ const avatarInitial = computed(() =>
 const isActive = (routeName) => {
     if (!routeName) return false
     try {
-        return route().current(routeName)
+        if (route().current(routeName)) return true
+
+        // Cek wildcard — ambil prefix sebelum titik terakhir
+        // 'accounts.index' → cek 'accounts.*'
+        const prefix = routeName.split('.').slice(0, -1).join('.')
+        if (prefix) return route().current(`${prefix}.*`)
+
+        return false
     } catch {
         return false
     }
@@ -122,8 +129,8 @@ const navigation = [
         children: [
             { name: 'Rekening',          routeName: 'accounts.index',    href: route('accounts.index') },
             { name: 'Kategori',          routeName: 'categories.index',  href: route('categories.index') },
-            { name: 'Chart of Accounts', routeName: 'coa.index',         href: '#' },
-            { name: 'Klien',             routeName: 'clients.index',     href: '#' },
+            { name: 'Chart of Accounts', routeName: 'chart-of-accounts.index',         href: route('chart-of-accounts.index') },
+            { name: 'Klien',             routeName: 'clients.index',     href: route('clients.index') },
         ],
     },
 ]
@@ -402,11 +409,12 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
             <div class="shrink-0 border-t border-gray-200 dark:border-gray-800 p-3">
                 <div class="flex items-center gap-3 rounded-lg px-2 py-2
                             hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
-                    <div class="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br
-                                from-indigo-500 to-violet-600 flex items-center
-                                justify-center text-white text-sm font-bold">
+                    <div v-if="!user.tenant?.logo" class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500
+                                to-violet-600 flex items-center justify-center
+                                text-white text-xs font-bold shrink-0">
                         {{ avatarInitial }}
                     </div>
+                    <div v-if="user.tenant?.logo" class="h-7 w-7 rounded-full bg-cover bg-center flex items-center justify-center" :style="{ backgroundImage: `url(${user.tenant?.logo})` }"></div>
                     <Transition enter-from-class="opacity-0"
                                 enter-active-class="transition duration-200 delay-75"
                                 leave-to-class="opacity-0"
@@ -625,10 +633,12 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                         <button @click.stop="showUserMenu = !showUserMenu"
                                 class="flex items-center gap-2 rounded-lg px-2 py-1.5
                                        hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                            <div class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500
+                            <div v-if="!user.tenant?.logo" class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500
                                         to-violet-600 flex items-center justify-center
                                         text-white text-xs font-bold shrink-0">
                                 {{ avatarInitial }}
+                            </div>
+                            <div v-if="user.tenant?.logo" class="h-7 w-7 rounded-full bg-cover bg-center flex items-center justify-center" :style="{ backgroundImage: `url(${user.tenant?.logo})` }">
                             </div>
                             <span class="hidden sm:block text-sm font-medium text-gray-700
                                          dark:text-gray-300 max-w-28 truncate">
@@ -661,7 +671,7 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                                     </p>
                                 </div>
                                 <div class="py-1">
-                                    <a href="#"
+                                    <a :href="route('profiles.index')"
                                        class="flex items-center gap-3 px-4 py-2 text-sm
                                               text-gray-700 dark:text-gray-300
                                               hover:bg-gray-50 dark:hover:bg-gray-800">

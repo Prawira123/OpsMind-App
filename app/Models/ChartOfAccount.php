@@ -77,8 +77,8 @@ class ChartOfAccount extends Model
     }
 
     // Relasi ke journal entry lines
-    public function journalEntryLines()
+    public function journalEntryDetails()
     {
-        return $this->hasMany(JournalEntryLine::class, 'account_id');
+        return $this->hasMany(JournalEntryDetail::class, 'account_id');
     }
 }

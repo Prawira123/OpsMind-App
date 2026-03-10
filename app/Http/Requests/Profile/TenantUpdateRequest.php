@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Client;
+namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-
-class ClientUpdateRequest extends FormRequest
+class TenantUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,24 +21,21 @@ class ClientUpdateRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array{
-
-        $client = $this->route('client');
-
+    public function rules(): array
+    {
         return [
             'name' => 'required|string|max:255',
-
             'email' => [
                 'required',
                 'email',
-                'max:255',
-                Rule::unique('clients')->ignore($client->id),
+                'string',
+                Rule::unique('tenants')->ignore(Auth::user()->tenant_id),
             ],
-
-            'phone' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            'company' => 'required|string|max:255',
+            'phone' => 'required|string|max:12',
+            'address' => 'nullable|string',
+            'currency' => 'required|string',
+            'timezone' => 'required|string',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }
-

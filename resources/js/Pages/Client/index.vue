@@ -4,76 +4,32 @@
     import Swal from 'sweetalert2'
     import AppLayout from '@/Layouts/AppLayout.vue'
     import PageHeader from '@/Components/Tenant/PageHeader.vue'
-    import PrimaryCard from '@/Components/Tenant/PrimaryCard.vue'
-    import SecondaryCard from '@/Components/Tenant/SecondaryCard.vue'
     import LogoCard from '@/Components/Partials/LogoCard.vue'
     import SearchBar from '@/Components/Partials/SearchBar.vue'
-    import OptionSelect from '@/Components/Partials/OptionSelect.vue'
     import ButtonDelete from '@/Components/Partials/ButtonDelete.vue'
     import BadgeSuccess from '@/Components/Partials/BadgeSuccess.vue'
+
     // PROPS — dikirim dari AccountController::index()
     const props = defineProps({
-        accounts: Array,
-        status: String,
+        clients: Array,
+        status : String,
     })
 
     // TIPE REKENING — label & style per tipe
-    const accountTypes = {
-        cash:    { label: 'Kas Tunai',  color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-        bank:    { label: 'Bank',       color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-        ewallet: { label: 'E-Wallet',   color: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' },
-        other:   { label: 'Lainnya',    color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400' },
-    }
-
     const tableHead = [
-            { key: 'name',           label: 'Nama Rekening' },
-            { key: 'type',           label: 'Tipe' },
-            { key: 'bank_name',      label: 'Bank' },
-            { key: 'account_number', label: 'No. Rekening' },
-            { key: 'balance',        label: 'Saldo' },
-            { key: 'is_active',      label: 'Status' },]
-
+            { key: 'name',           label: 'Nama Client' },
+            { key: 'email',           label: 'Email' },
+            { key: 'phone',      label: 'No Telp' },
+            { key: 'address', label: 'Alamat' },
+            { key: 'company',        label: 'Perusahaan' },
+    ]
     // SEARCH
     const search = ref('')
 
-    // FILTER TIPE
-    const filterType = ref('all')
-
-    const optionFilter = [
-        {
-            key : 'all',
-            value : 'Semua Tipe',
-        },
-        {
-            key : 'cash',
-            value : 'Kas Tunai',
-        },
-        {
-            key : 'bank',
-            value : 'Bank',
-        },
-        {
-            key : 'ewallet',
-            value : 'E-Wallet',
-        },
-        {
-            key : 'other',
-            value : 'Lainnya',
-        },
-        
-    ]
+    // FILTER TIP
 
     const columnTypes = {
-        name:           'nameWithIcon',
-        type:           'badge',
-        account_number: 'mono',
-        balance:        'currency',
-        is_active:      'badge',
-    }
-
-    const statusTypes = {
-        true:  { label: 'Aktif',    color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-        false: { label: 'Nonaktif', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+        phone : 'mono'
     }
 
     // SORT
@@ -81,44 +37,25 @@
     const sortDir = ref('asc')
 
     // FILTERED & SORTED DATA
-    const filteredAccounts = computed(() => {
-        let data = [...(props.accounts ?? [])]
+    const filteredClients = computed(() => {
+        let data = [...(props.clients ?? [])]
 
         // Filter search
         if (search.value) {
             const q = search.value.toLowerCase()
             data = data.filter(a =>
                 (a.name?.toLowerCase() ?? '').includes(q) ||
-                (a.bank_name?.toLowerCase() ?? '').includes(q) ||
-                (a.account_number?.toLowerCase() ?? '').includes(q)
+                (a.company?.toLowerCase() ?? '').includes(q) ||
+                (a.email?.toLowerCase() ?? '').includes(q)
             )
         }
         console.log(data);
-
-
-        // Filter tipe
-        if (filterType.value !== 'all') {
-            data = data.filter(a => a.type === filterType.value)
-        }
 
     
         // Sort
         data.sort((a, b) => {
             let valA = a[sortKey.value] ?? ''
             let valB = b[sortKey.value] ?? ''
-
-            // Khusus balance — sort numerik
-            if (sortKey.value === 'balance') {
-                valA = parseFloat(valA) || 0
-                valB = parseFloat(valB) || 0
-                return sortDir.value === 'asc' ? valA - valB : valB - valA
-            }
-
-            if (sortKey.value === 'is_active') {
-                valA = valA === true ? 1 : 0
-                valB = valB === true ? 1 : 0
-                return sortDir.value === 'asc' ? valA - valB : valB - valA
-            }
 
             valA = String(valA).toLowerCase()
             valB = String(valB).toLowerCase()
@@ -131,16 +68,16 @@
     })
 
     // SUMMARY CARDS — total per tipe
-    const summary = computed(() => {
-        const accounts = props.accounts ?? []
-        return {
-            total:   accounts.length,
-            cash:    accounts.filter(a => a.type === 'cash').length,
-            bank:    accounts.filter(a => a.type === 'bank').length,
-            ewallet: accounts.filter(a => a.type === 'ewallet').length,
-            totalBalance: accounts.reduce((sum, a) => sum + (parseFloat(a.balance) || 0), 0),
-        }
-    })
+    // const summary = computed(() => {
+    //     const accounts = props.accounts ?? []
+    //     return {
+    //         total:   accounts.length,
+    //         cash:    accounts.filter(a => a.type === 'cash').length,
+    //         bank:    accounts.filter(a => a.type === 'bank').length,
+    //         ewallet: accounts.filter(a => a.type === 'ewallet').length,
+    //         totalBalance: accounts.reduce((sum, a) => sum + (parseFloat(a.balance) || 0), 0),
+    //     }
+    // })
 
     // BULK DELETE
     const selected    = ref([])
@@ -153,7 +90,7 @@
         console.log(selectAll.value)
 
         if (selectAll.value) {
-            selected.value = filteredAccounts.value.map(a => a.id)
+            selected.value = filteredClients.value.map(a => a.id)
         } else {
             selected.value = []
         }
@@ -167,26 +104,13 @@
         } else {
             selected.value.splice(idx, 1)
         }
-        selectAll.value = selected.value.length === filteredAccounts.value.length
+        selectAll.value = selected.value.length === filteredClients.value.length
     }
 
     const bulkDeleteForm = useForm({ ids: [] })
 
     const confirmBulkDelete = () => {
         if (!selected.value.length) return
-
-        const accountWithBalance = props.accounts.filter(a => 
-            selected.value.includes(a.id) && a.balance > 0
-        )
-
-        if(accountWithBalance.length > 0 ){
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Tidak dapat menghapus rekening yang masih memiliki saldo',
-            })
-            return
-        }
 
         bulkDeleteForm.ids = selected.value
         Swal.fire({
@@ -199,7 +123,7 @@
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                bulkDeleteForm.delete(route('accounts.bulk-destroy'), {
+                bulkDeleteForm.delete(route('clients.bulk-destroy'), {
                 onSuccess: () => {
                     selected.value = []
                     selectAll.value = false
@@ -213,18 +137,7 @@
     }
 
     // DELETE SINGLE
-    const deleteAccount = (id) => {
-
-        const account = props.accounts.find(a => a.id == id)
-
-            if(account.balance > 0){
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: `Rekening "${account.name}" masih memiliki saldo. Kosongkan saldo atau transafer ke rekening lain terlebih dahulu.`,
-                })
-                return
-            }
+    const deleteClient = (id) => {
         
         Swal.fire({
             title: 'Are you sure?',
@@ -236,18 +149,9 @@
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(route('accounts.destroy', id))
+                router.delete(route('clients.destroy', id))
             }
         })
-    }
-
-    // FORMAT CURRENCY
-    const formatCurrency = (value) => {
-        return new Intl.NumberFormat('id-ID', {
-            style:    'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(value || 0)
     }
 
     const toggleSort = (key) => {
@@ -267,7 +171,7 @@
     const showStatus = ref(false)
 
     watch(() => props.status, (val) => {
-        if(val){
+        if (val) {
             showStatus.value = true
             setTimeout(() => {
                 showStatus.value = false
@@ -278,28 +182,12 @@
     </script>
 
     <template>
-        <AppLayout title="Rekening Page">
+        <AppLayout title="Client Page">
 
             <!-- PAGE HEADER -->
             
-            <PageHeader :href="route('accounts.create')" :title="'Rekening'" :desc="'Kelola rekening kas, bank, dan e-wallet bisnis kamu'" :btnDesc="'Rekening'"/>
-
-            <!-- SUMMARY CARDS -->
-            <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-
-                <PrimaryCard :titleCard="'Total Balance'" :mainDesc="formatCurrency(summary.totalBalance)" :subDesc="summary.total" :subTitle="'Rekening'"/>
-
-                <!-- Kas -->   
-                <SecondaryCard :main-desc="summary.cash" :title-card="'Kas Tunai'" :sub-title="'Rekening'" :logoPath="'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'" :classLogo="'h-4 w-4 text-emerald-600'"/>
-
-                <!-- Bank -->
-                <SecondaryCard :main-desc="summary.bank" :title-card="'Bank'" :sub-title="'Rekening'" :logoPath="'M3 6l9-4 9 4M3 10h18M5 10v8m4-8v8m4-8v8m4-8v8 M19 10v8M3 18h18'" :classLogo="'h-4 w-4 text-blue-600'"/>
-
-                <!-- E-Wallet -->
-                <SecondaryCard :main-desc="summary.ewallet" :title-card="'E-Wallet'" :sub-title="'Rekening'" :logoPath="'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z'" :classLogo="'h-4 w-4 text-violet-600'"/>
-
-            </div>
-
+            <PageHeader :href="route('clients.create')" :title="'Client'" :desc="'Kelola Daftar Client penting kamu'" :btnDesc="'Client'"/>
+            
             <div class="" v-if="showStatus">
                 <BadgeSuccess :status="props.status"/>
             </div>
@@ -317,19 +205,8 @@
                         <div class="relative">
                             <LogoCard :class="'absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400'" 
                             :logo-path="'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0'"/>
-                            <SearchBar v-model="search" :class="'w-full sm:w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 pl-9 pr-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition'" :type="'text'" :placeholder="'Cari Rekening...'"/>
+                            <SearchBar v-model="search" :class="'w-full sm:w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 pl-9 pr-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition'" :type="'text'" :placeholder="'Cari Client...'"/>
                         </div>
-
-                        <!-- Filter Tipe -->
-                        <select
-                            v-model="filterType"
-                            class="rounded-lg border border-gray-200 dark:border-gray-700
-                                bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm
-                                text-gray-900 dark:text-white focus:outline-none
-                                focus:ring-2 focus:ring-indigo-500 transition"
-                        >
-                            <OptionSelect v-for="item in optionFilter" :key="item.key" :item="item"/>
-                        </select>
                     </div>
 
                     <!-- Bulk delete button — muncul saat ada yang dipilih -->
@@ -395,7 +272,7 @@
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
 
                             <!-- Empty state -->
-                            <tr v-if="filteredAccounts.length === 0">
+                            <tr v-if="filteredClients.length === 0">
                                 <td :colspan="tableHead.length + 2" class="px-4 py-16 text-center">
                                     <div class="flex flex-col items-center gap-3">
                                         <div class="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-800
@@ -420,7 +297,7 @@
 
                             <!-- Data rows -->
                             <tr
-                                v-for="row in filteredAccounts"
+                                v-for="row in filteredClients"
                                 :key="row.id"
                                 :class="[
                                     'transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50',
@@ -472,28 +349,6 @@
                                             {{ row[col.key] }}
                                         </p>
                                     </div>
-
-                                    <!-- Tipe: badge — menggunakan object `type` untuk label & warna -->
-                                    <span
-                                        v-else-if="getCellType(col.key) === 'badge' && col.key === 'type'"
-                                        :class="[
-                                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                                            accountTypes?.[row[col.key]]?.color ?? 'bg-gray-100 text-gray-700'
-                                        ]"
-                                    >
-                                        {{ accountTypes?.[row[col.key]]?.label ?? row[col.key] }}
-                                    </span>
-                                    <span
-                                        v-else-if="getCellType(col.key) === 'badge' && col.key === 'is_active'"
-                                        :class="[
-                                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                                            statusTypes?.[row[col.key]]?.color ?? 'bg-gray-100 text-gray-700'
-                                        ]"
-                                    >
-                                        {{ statusTypes?.[row[col.key]]?.label ?? row[col.key] }}
-                                    </span>
-
-                                    <!-- Tipe: currency -->
                                     <p
                                         v-else-if="getCellType(col.key) === 'currency'"
                                         class="text-sm font-semibold text-gray-900 dark:text-white"
@@ -519,7 +374,7 @@
                                 <td class="px-4 py-3.5">
                                     <div class="flex items-center justify-end gap-1">
                                         <Link
-                                            :href="route('accounts.edit', row.id)"
+                                            :href="route('clients.edit', row.id)"
                                             class="flex h-8 w-8 items-center justify-center rounded-lg
                                                 text-gray-400 hover:text-indigo-600
                                                 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition"
@@ -533,7 +388,7 @@
                                         </Link>
 
                                         <button
-                                            @click="deleteAccount(row.id)"
+                                            @click="deleteClient(row.id)"
                                             class="flex h-8 w-8 items-center justify-center rounded-lg
                                                 text-gray-400 hover:text-red-600
                                                 hover:bg-red-50 dark:hover:bg-red-900/20 transition"

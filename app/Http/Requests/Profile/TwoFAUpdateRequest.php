@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\ChartOfAccount;
+namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChartOfAccountStoreRequest extends FormRequest
+class TwoFAUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +22,7 @@ class ChartOfAccountStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => 'required|exists:account_types,id',
-            'parent_id' => 'nullable|exists:chart_of_accounts,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'balance' => 'nullable|numeric',
-            'is_active' => 'required|boolean',
-            'is_locked' => 'required|boolean',
+            'enabled' => 'required|boolean',
         ];
     }
 }

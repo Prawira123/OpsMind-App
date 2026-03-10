@@ -72,11 +72,11 @@ Route::middleware('auth')->group(function () {
 
     //OTP Code 
     Route::get('/auth/otp/{type}', [OTPController::class, 'create'])->name('otp.verify')
-        ->whereIn('type', ['email_verification']);
+        ->whereIn('type', ['email_verification', 'reset_password']);
     Route::post('/auth/otp/{type}', [OTPController::class, 'store'])->name('otp.store')
-        ->whereIn('type', ['email_verification']);    
+        ->whereIn('type', ['email_verification', 'reset_password']);    
     Route::post('/auth/otp/resend/{type}', [OTPController::class, 'resendCode'])->name('otp.resend')
-        ->whereIn('type', ['email_verification']);  
+        ->whereIn('type', ['email_verification', 'reset_password']);  
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 

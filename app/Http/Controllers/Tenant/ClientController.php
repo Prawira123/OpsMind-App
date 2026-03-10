@@ -13,11 +13,15 @@ use Inertia\Inertia;
 class ClientController extends Controller
 {
     public function index(){
-        return Inertia::render('Tenant/Clients/Index');
+        $clients = Client::where('tenant_id', Auth::user()->tenant_id)->get();
+        return Inertia::render('Client/index', [
+            'status' => session('success'),
+            'clients' => $clients
+        ]);
     }
 
     public function create(){
-        return Inertia::render('Tenant/Clients/Create');
+        return Inertia::render('Client/create');
     }
 
     public function store(ClientStoreRequest $request, ClientService $service){
@@ -28,7 +32,7 @@ class ClientController extends Controller
     }
 
     public function edit(Client $client){
-        return Inertia::render('Tenant/Clients/Edit', compact('client'));
+        return Inertia::render('Client/edit', compact('client'));
     }
 
     public function update(ClientUpdateRequest $request, Client $client, ClientService $service){

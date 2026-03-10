@@ -16,7 +16,10 @@ class AccountController extends Controller
     public function index(){
         $accounts = Account::all();
 
-        return Inertia::render('Account/index', compact('accounts'));
+        return Inertia::render('Account/index', [
+            'status' => session('success'),
+            'accounts' => $accounts
+        ]);
     }
 
     public function create(){
@@ -71,7 +74,7 @@ class AccountController extends Controller
             if($account->tenant_id !== Auth::user()->tenant_id){
                 abort(403, 'Kamu tidak Punya Akses');
             }
-            
+
             $service->delete($account->id);
         }
 

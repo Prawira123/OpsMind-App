@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Tenant\AccountController;
 use App\Http\Controllers\Tenant\CategoryController;
 use App\Http\Controllers\Tenant\ChartOfAccountController;
+use App\Http\Controllers\Tenant\ClientController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -47,7 +49,18 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
     Route::resource('categories', CategoryController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
 
     //Chart of accounts Route
+    Route::delete('CoA/bulk-destroy', [ChartOfAccountController::class, 'bulkDestroy'])->middleware(['throttle:60,1'])
+    ->name('CoA.bulk-destroy');
     Route::resource('chart-of-accounts', ChartOfAccountController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+
+    //Client Route
+    Route::resource('clients', ClientController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+
+    //Profile route
+    Route::resource('profiles', ProfileController::class)->only(['index']);
+    Route::post('profile/update_tenant', [ProfileController::class, 'updateTenant'])->name('profile.update_tenant');
+    Route::put('profile/update_user/{id}', [ProfileController::class, 'updateUser'])->name('profile.update_user');
+    Route::put('profile/update_2fa', [ProfileController::class, 'update2FA'])->name('profile.update_2fa');
 
 });
 

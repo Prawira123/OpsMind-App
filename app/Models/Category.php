@@ -19,7 +19,7 @@ class Category extends Model
     }
     
     protected $fillable = [
-        'tenant_id', 'name', 'type', 'color', 'icon', 'is_dafult'
+        'tenant_id', 'name', 'type', 'color', 'icon', 'is_default'
     ];
 
     public function tenant(){

@@ -11,7 +11,6 @@
 
 </script>
 
-
 <template>
     <div class="rounded-xl bg-white dark:bg-gray-900 border
                         border-gray-200 dark:border-gray-800 p-5">
@@ -20,7 +19,7 @@
                                uppercase tracking-wider">
                         {{ props.titleCard }}
                     </p>
-                    <div class="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30
+                    <div class="h-8 w-8 rounded-lg bg-gray-100 dark:bg-gray-600/20
                         flex items-center justify-center">
                         <LogoCard :logoPath="props.logoPath" :class="props.classLogo"/>
                     </div>

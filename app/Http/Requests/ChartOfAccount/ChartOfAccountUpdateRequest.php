@@ -22,12 +22,13 @@ class ChartOfAccountUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_type_id' => 'required|exists:account_types,id',
+            'type' => 'required|exists:account_types,id',
             'parent_id' => 'nullable|exists:chart_of_accounts,id',
-            'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'balance' => 'nullable|numeric',
+            'is_active' => 'required|boolean',
+            'is_locked' => 'required|boolean',
         ];
     }
 }

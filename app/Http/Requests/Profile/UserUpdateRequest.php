@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Requests\ChartOfAccount;
+namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
-class ChartOfAccountStoreRequest extends FormRequest
+class UserUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +24,14 @@ class ChartOfAccountStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => 'required|exists:account_types,id',
-            'parent_id' => 'nullable|exists:chart_of_accounts,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'balance' => 'nullable|numeric',
-            'is_active' => 'required|boolean',
-            'is_locked' => 'required|boolean',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+            'nullable', 
+            'string', 
+            'email', 
+            'max:255',
+            Rule::unique('users')->ignore(Auth::user()->id),
+            ],
         ];
     }
 }

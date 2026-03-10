@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\ChartOfAccount;
 use Illuminate\Support\Facades\Auth;
-use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use Illuminate\Support\Facades\Log;
 
 class ChartOfAccountService extends BaseService
 {
@@ -15,29 +15,46 @@ class ChartOfAccountService extends BaseService
 
     public function store(array $data){
         
-        $this->chartOfAccount->create([
+        $coa = ChartOfAccount::where('tenant_id', Auth::user()->tenant_id)
+        ->where('account_type_id', $data['type'])
+        ->orderBy('code', 'desc')->first();
+        
+        if($coa){
+            $code = $coa->code + 1;
+        }else{
+            $code = 1;
+        }
+
+        $createdCoA = $this->chartOfAccount->create([
             'tenant_id' => Auth::user()->tenant_id,
-            'account_type_id' => $data['account_type_id'],
+            'account_type_id' => $data['type'],
             'parent_id' => $data['parent_id'],
-            'code' => $data['code'],
+            'code' => $code,
             'name' => $data['name'],
             'description' => $data['description'],
-            'balance' => $data['balance'],
+            'balance' => $data['balance'] ?? 0,
+            'is_active' => $data['is_active'] ?? true,
+            'is_locked' => $data['is_locked'] ?? false,
         ]);
 
-        return $this->chartOfAccount;
+        Log::info("data masuk", [
+            'chartOfAccount' => $createdCoA
+        ]);
+
+        return $createdCoA;
     }
 
     public function update(array $data, $id){
         $chartOfAccount = $this->chartOfAccount->find($id);
 
         $chartOfAccount->update([
-            'account_type_id' => $data['account_type_id'],
+            'account_type_id' => $data['type'],
             'parent_id' => $data['parent_id'],
-            'code' => $data['code'],
             'name' => $data['name'],
             'description' => $data['description'],
             'balance' => $data['balance'],
+            'is_active' => $data['is_active'] ?? $chartOfAccount->is_active,
+            'is_locked' => $data['is_locked'] ?? $chartOfAccount->is_locked,
         ]);
 
         return $chartOfAccount;
