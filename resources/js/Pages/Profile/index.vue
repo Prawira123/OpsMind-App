@@ -70,7 +70,7 @@ const twoFactorEnabled = useForm({
 })
 
 const submitPassword = () => {
-    passwordForm.put(route('password.update'), {
+    passwordForm.put(route('profile.update_password'), {
         onSuccess: () => passwordForm.reset(),
     })
 }

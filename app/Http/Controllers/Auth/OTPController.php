@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\OTPService;
+use App\Services\ProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Password;
-use App\Models\User;
-
+use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Profiler\Profile;
 
 class OTPController extends Controller
 {
@@ -29,7 +30,7 @@ class OTPController extends Controller
         ]);
     }
 
-    public function store(string $type, OTPService $service, Request $request){
+    public function store(string $type, OTPService $service, Request $request, ProfileService $serviceProfile){
         
         $request->validate([
             'code' => 'required|digits:6',
@@ -72,6 +73,16 @@ class OTPController extends Controller
 
             return redirect()->route('login')
                          ->with('status', 'Link reset password telah dikirim ke email kamu');
+        }
+
+        if($type == 'reset_password'){
+            
+            $serviceProfile->updatePassword(session('data_password'));
+            
+            Auth::logout();
+
+            return redirect()->route('login')
+                         ->with('status', 'password sudah tereset, coba masukkan password yang baru');
         }
 
         if($type == 'two_factor'){

@@ -2,26 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Profile\PasswordUpdateRequest;
 use App\Http\Requests\Profile\TenantUpdateRequest;
 use App\Http\Requests\Profile\TwoFAUpdateRequest;
 use App\Http\Requests\Profile\UserUpdateRequest;
-use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Tenant;
+use App\Services\OTPService;
 use App\Services\ProfileService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
+
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
 
     public function index(){
 
@@ -98,6 +95,23 @@ class ProfileController extends Controller
         $service->update2FA($request->validated());
 
         return redirect()->route('profiles.index')->with('success', 'Pengaturan 2FA berhasil diubah');
+    }
+
+    public function updatePassword(PasswordUpdateRequest $request, OTPService $generateOTP){
+        
+        $user = Auth::user();
+
+        if(!$user){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+    
+        $data = $request->validated();
+
+        session(['data_password' => $data]);
+
+        $generateOTP->generate($user, 'reset_password');
+
+        return redirect()->route('otp.verify', ['type' => 'reset_password']);  
     }
 
     

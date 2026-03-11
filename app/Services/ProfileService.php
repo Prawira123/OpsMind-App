@@ -61,4 +61,21 @@ class ProfileService extends BaseService
             'two_factor_enabled' => $data['enabled'],
         ]);
     }  
+
+    public function updatePassword(array $data){
+        $userid = Auth::user()->id;
+        $user = User::find($userid);
+
+        if(!$user){
+            abort(403, 'Kamu tidak Punya Akses');
+        }
+
+        if(!$user->password == $data['current_password']){
+            abort(403, 'Password Lama Salah');
+        }
+
+        $user->update([
+            'password' => bcrypt($data['password']),
+        ]);
+    }
 }

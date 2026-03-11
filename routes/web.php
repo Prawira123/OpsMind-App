@@ -61,6 +61,7 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
     Route::post('profile/update_tenant', [ProfileController::class, 'updateTenant'])->name('profile.update_tenant');
     Route::put('profile/update_user/{id}', [ProfileController::class, 'updateUser'])->name('profile.update_user');
     Route::put('profile/update_2fa', [ProfileController::class, 'update2FA'])->name('profile.update_2fa');
+    Route::put('profile/update_password', [ProfileController::class, 'updatePassword'])->name('profile.update_password');
 
 });
 

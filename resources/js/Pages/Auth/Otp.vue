@@ -19,6 +19,7 @@ const typeLabel = computed(() => ({
     'forgot_password'    : 'Reset Password',
     'two_factor'         : 'Login Dua Faktor',
     'sensitive_action'   : 'Konfirmasi Aksi',
+    'reset_password'   : 'Reset Password',
 }[props.type] ?? 'Verifikasi OTP'))
 
 // COUNTDOWN TIMER

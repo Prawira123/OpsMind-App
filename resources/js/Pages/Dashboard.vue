@@ -6,7 +6,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 <template>
 
     <AppLayout title="Dashboard">
-        <Head>Dashboard</Head>
+        <Head title="Dashboard">Dashboard</Head>
+        
         <div class="rounded-xl bg-white dark:bg-gray-900 p-6
                     border border-gray-200 dark:border-gray-800">
             <p class="text-gray-600 dark:text-gray-400">
