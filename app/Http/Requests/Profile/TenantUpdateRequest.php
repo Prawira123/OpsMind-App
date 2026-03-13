@@ -31,10 +31,10 @@ class TenantUpdateRequest extends FormRequest
                 'string',
                 Rule::unique('tenants')->ignore(Auth::user()->tenant_id),
             ],
-            'phone' => 'required|string|max:12',
+            'phone' => 'nullable|string|max:12',
             'address' => 'nullable|string',
-            'currency' => 'required|string',
-            'timezone' => 'required|string',
+            'currency' => 'nullable|string',
+            'timezone' => 'nullable|string',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }

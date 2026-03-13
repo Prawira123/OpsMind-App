@@ -7,6 +7,7 @@ use App\Http\Controllers\Tenant\AccountController;
 use App\Http\Controllers\Tenant\CategoryController;
 use App\Http\Controllers\Tenant\ChartOfAccountController;
 use App\Http\Controllers\Tenant\ClientController;
+use App\Http\Controllers\Tenant\NotificationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -63,6 +64,14 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
     Route::put('profile/update_2fa', [ProfileController::class, 'update2FA'])->name('profile.update_2fa');
     Route::put('profile/update_password', [ProfileController::class, 'updatePassword'])->name('profile.update_password');
 
+    //Notification Route
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])
+     ->name('notifications.destroy');
+    Route::get('notifications/{id}', [NotificationController::class, 'show'])
+     ->name('notifications.show');
 });
 
 require __DIR__.'/auth.php';

@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\ChangePasswordNotification;
 use App\Services\OTPService;
 use App\Services\ProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
-use Symfony\Component\HttpKernel\Profiler\Profile;
 
 class OTPController extends Controller
 {
@@ -78,7 +78,8 @@ class OTPController extends Controller
         if($type == 'reset_password'){
             
             $serviceProfile->updatePassword(session('data_password'));
-            
+            $user->notify(new ChangePasswordNotification());
+
             Auth::logout();
 
             return redirect()->route('login')

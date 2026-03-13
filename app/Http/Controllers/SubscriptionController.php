@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\SubscriptionPlan;
+use App\Notifications\SuscriptionNotification;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -39,13 +41,13 @@ class SubscriptionController extends Controller
             ]);
         });
 
+        $user = auth()->user();
+        $user->notify(new SuscriptionNotification($user, $plan));
+
         return redirect()->route('dashboard')
                          ->with('success', 'Selamat datang! Akun kamu sudah aktif.');
     }
-    // ─────────────────────────────────────
-    // PAID PLAN → arahkan ke pembayaran
-    // (service pembayaran belum dibuat)
-    // ─────────────────────────────────────
+
     return redirect()->route('payment.checkout', [
         'plan_id' => $plan->id,
     ]);

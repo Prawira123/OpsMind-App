@@ -1,15 +1,20 @@
 <script setup>
-import { Link, usePage } from '@inertiajs/vue3'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 defineProps({
     title: { type: String, default: '' },
+    notifications : {type : Array, required : false},
+    unreadCount   : {type : Number, required : false},
 })
 
 const page = usePage()
 
 // Data dari HandleInertiaRequests shared props
 const user   = computed(() => page.props.auth?.user)
+
+const notifications = computed(() => page.props.notifications ?? [])
+const unreadCount   = computed(() => page.props.unreadCount ?? 0)
 
 const avatarInitial = computed(() =>
     user.value?.name?.charAt(0)?.toUpperCase() ?? 'U'
@@ -203,6 +208,18 @@ const toggleDropdown = (name) => {
 // =========================================================
 const showNotifications = ref(false)
 const showUserMenu      = ref(false)
+
+const handleNotificationClick = (notif) => {
+    router.get(route('notifications.show', notif.id), {}, {
+        preserveScroll: true
+    })
+}
+
+const markAllAsRead = () => {
+    router.post(route('notifications.markAllAsRead'), {}, {
+        preserveScroll: true
+    })
+}
 
 const closeAll = (e) => {
     if (!e.target.closest('.notif-btn')) showNotifications.value = false
@@ -551,7 +568,7 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                                          0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714
                                          0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
                             </svg>
-                            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"/>
+                            <span v-if="unreadCount > 0" class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"/>
                         </button>
 
                         <Transition enter-from-class="opacity-0 translate-y-1"
@@ -566,15 +583,21 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                                 <div class="flex items-center justify-between px-4 py-3
                                             border-b border-gray-100 dark:border-gray-800">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                        Notifikasi
+                                        Notifikasi ({{ unreadCount }})
                                     </p>
-                                    <button class="text-xs text-indigo-600 hover:underline">
+                                    <button @click="markAllAsRead" class="text-xs text-indigo-600 hover:underline">
                                         Tandai semua dibaca
                                     </button>
                                 </div>
-                                <div class="divide-y divide-gray-100 dark:divide-gray-800">
-                                    <div class="flex gap-3 px-4 py-3 hover:bg-gray-50
-                                                dark:hover:bg-gray-800 cursor-pointer transition">
+
+                                <div class="divide-y divide-gray-100 dark:divide-gray-800 max-h-96 overflow-y-auto">
+                                    <div v-if="notifications.length === 0" class="px-4 py-8 text-center text-gray-500 text-sm">
+                                        Tidak ada notifikasi baru
+                                    </div>
+                                    <div v-for="notif in notifications" :key="notif.id" 
+                                         @click="handleNotificationClick(notif)"
+                                         class="flex gap-3 px-4 py-3 hover:bg-gray-50
+                                                dark:hover:bg-gray-800 cursor-pointer transition relative">
                                         <div class="h-8 w-8 rounded-full bg-green-100
                                                     dark:bg-green-900/30 flex items-center
                                                     justify-center shrink-0">
@@ -586,39 +609,17 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                                             </svg>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm text-gray-900 dark:text-white">
-                                                Invoice #INV-001 telah dibayar
+                                            <p class="text-sm text-gray-900 dark:text-white" :class="{'font-bold': !notif.read_at}">
+                                                {{ notif.message }}
                                             </p>
-                                            <p class="text-xs text-gray-400 mt-0.5">2 menit lalu</p>
+                                            <p class="text-xs text-gray-400 mt-0.5">{{ notif.time }}</p>
                                         </div>
-                                        <div class="h-2 w-2 rounded-full bg-indigo-500 shrink-0 mt-1.5"/>
-                                    </div>
-                                    <div class="flex gap-3 px-4 py-3 hover:bg-gray-50
-                                                dark:hover:bg-gray-800 cursor-pointer transition">
-                                        <div class="h-8 w-8 rounded-full bg-yellow-100
-                                                    dark:bg-yellow-900/30 flex items-center
-                                                    justify-center shrink-0">
-                                            <svg class="h-4 w-4 text-yellow-600" fill="none"
-                                                 viewBox="0 0 24 24" stroke="currentColor"
-                                                 stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0
-                                                         2.502-1.667 1.732-3L13.732 4c-.77-1.333
-                                                         -2.694-1.333-3.464 0L3.34 16c-.77 1.333
-                                                         .192 3 1.732 3z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm text-gray-900 dark:text-white">
-                                                Invoice #INV-003 jatuh tempo besok
-                                            </p>
-                                            <p class="text-xs text-gray-400 mt-0.5">1 jam lalu</p>
-                                        </div>
+                                        <div v-if="!notif.read_at" class="h-2 w-2 rounded-full bg-indigo-500 shrink-0 mt-1.5"/>
                                     </div>
                                 </div>
                                 <div class="px-4 py-2.5 border-t border-gray-100
                                             dark:border-gray-800 text-center">
-                                    <a href="#" class="text-xs text-indigo-600 hover:underline">
+                                    <a :href="route('notifications.index')" class="text-xs text-indigo-600 hover:underline">
                                         Lihat semua notifikasi
                                     </a>
                                 </div>

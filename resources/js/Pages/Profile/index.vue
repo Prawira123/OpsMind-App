@@ -50,7 +50,7 @@ const tenantForm = useForm({
     address:  props.tenant.address  ?? '',
     currency: props.tenant.currency ?? 'IDR',
     timezone: props.tenant.timezone ?? 'Asia/Jakarta',
-    logo:     null,
+    logo:     props.tenant.logo     ?? '',
 })
 
 const submitTenant = () => tenantForm.post(route('profile.update_tenant'))
@@ -365,6 +365,9 @@ watch(() => props.status, (val)=>{
                                 PNG, JPG, SVG. Maks 2MB.
                             </p>
                         </div>
+                        <p v-if="tenantForm.errors.name" class="mt-1.5 text-xs text-red-500">
+                            {{ tenantForm.errors.name }}
+                        </p>
                     </div>
                 </div>
 
