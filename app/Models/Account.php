@@ -47,4 +47,8 @@ class Account extends Model
     public function tenant(){
         return $this->belongsTo(Tenant::class);
     }
+
+    public function transactions(){
+        return $this->hasMany(Transaction::class, 'rekening_id');
+    }
 }

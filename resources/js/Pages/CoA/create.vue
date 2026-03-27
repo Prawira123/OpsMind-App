@@ -20,6 +20,7 @@ const form = useForm({
     balance:0,
     is_locked:false,
     is_active:false,
+    normal_post: '',
 })
 
 watch(() => form.name, () => {
@@ -194,6 +195,30 @@ const displayBalance = () => {
 
                         <p v-if="form.errors.parent_id" class="mt-1.5 text-xs text-red-500">
                             {{ form.errors.parent_id }}
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Normal Post
+                        </label>
+                        <select
+                            v-model="form.normal_post"
+                            :class="[
+                                'w-full rounded-lg border px-3.5 py-2.5 text-sm',
+                                'text-gray-900 dark:text-white',
+                                'bg-white dark:bg-gray-800 transition',
+                                'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent',
+                                form.errors.normal_post
+                                    ? 'border-red-400 dark:border-red-500'
+                                    : 'border-gray-200 dark:border-gray-700',
+                            ]"
+                        >
+                            <option value="">— Pilih Normal Post Akun —</option>
+                            <option value="debit">Debit</option>
+                            <option value="credit">Kredit</option>
+                        </select>
+                        <p v-if="form.errors.normal_post" class="mt-1.5 text-xs text-red-500">
+                            {{ form.errors.normal_post }}
                         </p>
                     </div>
 

@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();  
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
-            $table->foreignId('debit_account_id')->constrained('accounts')->cascadeOnDelete();
-            $table->foreignId('credit_account_id')->constrained('accounts')->cascadeOnDelete();
+            $table->foreignId('debit_account_id')->constrained('chart_of_accounts')->cascadeOnDelete();
+            $table->foreignId('credit_account_id')->constrained('chart_of_accounts')->cascadeOnDelete();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->enum('type', ['expense', 'income'])->default('expense');
@@ -32,7 +32,9 @@ return new class extends Migration
         Schema::create('transaction_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained('transactions')->cascadeOnDelete();  
+            $table->string('name');
             $table->string('description');
+            $table->integer('qty');
             $table->decimal('amount', 30, 2);
             $table->decimal('unit_price', 30, 2);
             $table->timestamps();

@@ -20,6 +20,7 @@ return new class extends Migration
             // Beban (5000) → Beban Operasional (5100) → Beban Gaji (5110)
             $table->string('code');        
             $table->string('name');       
+            $table->enum('normal_post', ['debit', 'credit'])->default('debit');       
             $table->text('description')->nullable();
             $table->decimal('balance', 20, 2)->default(0);
             $table->boolean('is_default')->default(false); // dari seeder

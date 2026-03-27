@@ -6,7 +6,6 @@ use App\Models\SubscriptionPlan;
 use App\Notifications\SuscriptionNotification;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 

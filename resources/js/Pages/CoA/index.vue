@@ -32,6 +32,7 @@ const tableHead = [
         { key: 'balance',   label: 'Saldo' },
         { key: 'is_active',   label: 'Status Aktif' },
         { key: 'is_locked',   label: 'Status Terkunci' },
+        { key: 'normal_post',   label: 'Normal Post' },
 ]
 
 // SEARCH
@@ -74,6 +75,7 @@ const columnTypes = {
     is_active:'badge',
     is_locked:'badge',
     account_type:'badge',
+    normal_post:'badge',
 }
 
 const statusAktifTypes = {
@@ -84,6 +86,11 @@ const statusAktifTypes = {
 const statusLockedTypes = {
     true:  { label: 'Terkunci',    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
     false: { label: 'Tidak Terkunci', color: 'bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-400' },
+}
+
+const normalPostTypes = {
+    debit:  { label: 'Debit',    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    credit: { label: 'Credit', color: 'bg-red-100 text-red-600 dark:bg-red-800 dark:text-red-400' },
 }
 
 // SORT
@@ -509,6 +516,15 @@ watch(() => props.status, (val) => {
                                         ]"
                                     >
                                         {{ statusLockedTypes?.[row[col.key]]?.label ?? row[col.key] }}
+                                    </span>
+                                    <span
+                                        v-else-if="getCellType(col.key) === 'badge' && col.key === 'normal_post'"
+                                        :class="[
+                                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                            normalPostTypes?.[row[col.key]]?.color ?? 'bg-gray-100 text-gray-700'
+                                        ]"
+                                    >
+                                        {{ normalPostTypes?.[row[col.key]]?.label ?? row[col.key] }}
                                     </span>
 
                                     <!-- Tipe: currency -->

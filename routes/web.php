@@ -8,6 +8,7 @@ use App\Http\Controllers\Tenant\CategoryController;
 use App\Http\Controllers\Tenant\ChartOfAccountController;
 use App\Http\Controllers\Tenant\ClientController;
 use App\Http\Controllers\Tenant\NotificationController;
+use App\Http\Controllers\Tenant\TransactionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,6 +21,11 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+// Route::get('/test-log', function () {
+//     Log::info('test log berhasil');
+//     return 'ok';
+// });
 
 //isolation test
 // Route::get('/test-isolation', function () {
@@ -72,6 +78,9 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
      ->name('notifications.destroy');
     Route::get('notifications/{id}', [NotificationController::class, 'show'])
      ->name('notifications.show');
+
+     //Transaction Route 
+     Route::resource('transactions', TransactionController::class)->only(['index', 'create' ,'store', 'show', 'edit', 'update', 'destroy']);
 });
 
 require __DIR__.'/auth.php';

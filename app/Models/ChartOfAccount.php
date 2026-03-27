@@ -34,6 +34,7 @@ class ChartOfAccount extends Model
         'is_default',
         'is_locked',
         'is_active',
+        'normal_post',
     ];
 
     protected $casts = [
@@ -80,5 +81,10 @@ class ChartOfAccount extends Model
     public function journalEntryDetails()
     {
         return $this->hasMany(JournalEntryDetail::class, 'account_id');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'account_id');
     }
 }

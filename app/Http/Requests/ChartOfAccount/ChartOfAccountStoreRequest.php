@@ -29,6 +29,7 @@ class ChartOfAccountStoreRequest extends FormRequest
             'balance' => 'nullable|numeric',
             'is_active' => 'required|boolean',
             'is_locked' => 'required|boolean',
+            'normal_post' => 'required|in:debit,credit',
         ];
     }
 }

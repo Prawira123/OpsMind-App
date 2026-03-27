@@ -26,18 +26,21 @@ class Transaction extends Model
     }
 
     protected $fillable = [
-        'tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no'
+        'tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no', 'tax_percent', 'other_fee', 'discount', 'rekening_id',
     ];
 
     protected $casts = [
         'amountTotal' => 'float',
-        'date' => 'date'
+        'tax_percent' => 'float',
+        'discount'    => 'float',
+        'other_fee'   => 'float',
+        'date'        => 'date'
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-        ->logOnly(['tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no'])
+        ->logOnly(['tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no', 'tax_percent', 'other_fee', 'discount', 'rekening_id'])
         ->logOnlyDirty()
         ->dontSubmitEmptyLogs()
         ->setDescriptionForEvent(fn(string $eventName) => match($eventName){
@@ -57,15 +60,22 @@ class Transaction extends Model
     }
 
     public function debit_account(){
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(ChartOfAccount::class);
     }
     public function credit_account(){
+        return $this->belongsTo(ChartOfAccount::class);
+    }
+    public function rekening(){
         return $this->belongsTo(Account::class);
     }
     public function createdBy(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
     public function client(){
         return $this->belongsTo(Client::class);
+    }
+
+    public function transaction_items(){
+        return $this->hasMany(TransactionItem::class);
     }
 }

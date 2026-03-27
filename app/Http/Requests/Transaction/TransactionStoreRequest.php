@@ -23,20 +23,25 @@ class TransactionStoreRequest extends FormRequest
     {
         return [
             'category_id'       => ['required', 'exists:categories,id'],
-            'debit_account_id'  => ['required', 'exists:accounts,id'],
-            'credit_account_id' => ['required', 'exists:accounts,id'],
+            'debit_account_id'  => ['required', 'exists:chart_of_accounts,id'],
+            'credit_account_id' => ['required', 'exists:chart_of_accounts,id'],
             'date'              => ['required', 'date'],
             'description'       => ['required', 'string', 'max:255'],
             'type'              => ['required', 'in:expense,income,transfer'],
             'reference_no'      => ['nullable', 'string'],
             'client_id'         => ['nullable', 'exists:clients,id'],
+            'discount'          => ['nullable', 'numeric', 'min:0'],
+            'tax_percent'       => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'other_fee'         => ['nullable', 'numeric', 'min:0'],
+            'rekening_id'       => ['required', 'exists:accounts,id'],
 
             // Items — validasi array
             'items'                  => ['required', 'array', 'min:1'],
+            'items.*.name'           => ['required', 'string', 'max:255'],
             'items.*.description'    => ['required', 'string', 'max:255'],
             'items.*.qty'            => ['required', 'numeric', 'min:0.01'],
             'items.*.unit_price'     => ['required', 'numeric', 'min:0'],
-            'items.*.amount_per_item'=> ['required', 'numeric', 'min:0'],
+            'items.*.amount'         => ['required', 'numeric', 'min:0'],
         ];
     }
 }

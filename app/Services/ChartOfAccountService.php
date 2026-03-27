@@ -71,4 +71,46 @@ class ChartOfAccountService extends BaseService
         $chartOfAccount->delete();
 
     }
+
+    public function updateBalance(array $data){
+        
+
+        foreach($data as $item) {
+            $coa = $this->chartOfAccount->findOrFail($item['id']);
+
+            // if($type === 'income'){
+            //     if($coa->normal_post === $item['line_type']){
+            //         $coa->increment('balance', $item['balance']);
+            //     }else{
+            //         $coa->decrement('balance', $item['balance']);
+            //     }   
+            // }else{
+            //     if($coa->normal_post === $item['line_type']){  
+            //         $coa->decrement('balance', $item['balance']);
+            //     }else{
+            //         $coa->increment('balance', $item['balance']);
+            //     }
+            // }
+
+            if($coa->normal_post === $item['line_type']){
+                $coa->increment('balance', $item['balance']);
+            }else{
+                $coa->decrement('balance', $item['balance']);
+            }   
+
+        }
+    }
+
+    public function restoreBalance(array $data){
+        
+        foreach($data as $item) {
+            $coa = $this->chartOfAccount->findOrFail($item['id']);
+
+            if($coa->normal_post === $item['line_type']){
+                $coa->decrement('balance', $item['balance']);
+            }else{
+                $coa->increment('balance', $item['balance']);
+            }
+        }
+    }
 }

@@ -96,7 +96,7 @@ const navigation = [
     {
         name:      'Transaksi',
         routeName: 'transactions.index',
-        href:      '#', // TODO: route('transactions.index')
+        href:      route('transactions.index'), // TODO: route('transactions.index')
         icon:      `<path stroke-linecap="round" stroke-linejoin="round"
                          d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>`,
     },
@@ -144,7 +144,7 @@ const bottomNavigation = [
     {
         name:      'Langganan',
         routeName: 'subscription.index',
-        href:      '#',
+        href:      route('subs.index'),
         icon:      `<path stroke-linecap="round" stroke-linejoin="round"
                          d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593
                             3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296

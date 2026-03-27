@@ -179,7 +179,7 @@ const handleNotificationClick = (notif) => {
             <div v-else  class="divide-y divide-gray-100 dark:divide-gray-800">
                 <div
                     @click="handleNotificationClick(notif)"
-                    v-for="(notif, index) in filteredNotifications"
+                    v-for="(notif) in filteredNotifications"
                     :key="notif.id"
                     :class="[
                         'flex items-start gap-4 px-5 py-4 transition-colors group rounded-xl',

@@ -49,13 +49,16 @@ class NotificationController extends Controller
     public function show($id){
         $notification = Auth::user()->notifications()->findOrFail($id);
 
+        if(!$notification->read_at){
+            $notification->markAsRead();
+        }
 
         return Inertia::render('Notifications/detail', [
             'notification' => [
                 'id' => $notification->id,
                 'data' => $notification->data,
                 'read_at' => $notification->read_at,
-
+                
                 'time'    => $notification->created_at->diffForHumans(),            ]
         ]);
     }

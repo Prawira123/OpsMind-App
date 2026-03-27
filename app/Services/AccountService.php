@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Account;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AccountService extends BaseService
 {
@@ -55,4 +56,34 @@ class AccountService extends BaseService
 
         $account->delete();
     }
+
+    public function updateBalance($id, array $data){
+
+        $this->account = $this->account->find($id);
+
+        if($data['type'] == 'income'){
+            $this->account->increment('balance', $data['balance']);
+        }else{
+            $this->account->decrement('balance', $data['balance']);
+        }
+
+        return $this->account;
+    } 
+    
+    public function restoreBalance($id, array $data){
+        $this->account = $this->account->find($id);
+
+        Log::info("data masuk", [
+            'account' => $this->account,
+            'data' => $data,
+        ]);
+
+        if($data['type'] == 'income'){
+            $this->account->decrement('balance', $data['balance']);
+        }else{
+            $this->account->increment('balance', $data['balance']);
+        }
+
+        return $this->account;
+    }   
 }
