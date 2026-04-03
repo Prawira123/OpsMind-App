@@ -26,7 +26,7 @@ class Transaction extends Model
     }
 
     protected $fillable = [
-        'tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no', 'tax_percent', 'other_fee', 'discount', 'rekening_id',
+        'tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no', 'tax_percent', 'other_fee', 'discount', 'rekening_id', 'status'
     ];
 
     protected $casts = [
@@ -40,7 +40,7 @@ class Transaction extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-        ->logOnly(['tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no', 'tax_percent', 'other_fee', 'discount', 'rekening_id'])
+        ->logOnly(['tenant_id', 'category_id', 'debit_account_id', 'credit_account_id', 'created_by','client_id', 'type', 'description', 'amountTotal', 'date', 'reference_no', 'tax_percent', 'other_fee', 'discount', 'status', 'rekening_id'])
         ->logOnlyDirty()
         ->dontSubmitEmptyLogs()
         ->setDescriptionForEvent(fn(string $eventName) => match($eventName){
@@ -73,6 +73,10 @@ class Transaction extends Model
     }
     public function client(){
         return $this->belongsTo(Client::class);
+    }
+
+    public function invoice(){
+        return $this->hasOne(Invoice::class);
     }
 
     public function transaction_items(){

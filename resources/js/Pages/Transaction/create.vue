@@ -25,6 +25,7 @@ const form = useForm({
     discount:          0,
     tax_percent:       0,
     other_fee:         0,
+    status : '',
     rekening_id:       '',
     items:             [],  // ← dikirim sekaligus saat submit
 })
@@ -307,6 +308,17 @@ const dc = [
                         </label>
                         <input v-model="form.reference_no" type="text"
                                placeholder="INV-001, PO-002..." :class="ic()"/>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Status
+                        </label>
+                        <select v-model="form.status" :class="ic()">
+                            <option value="">— Pilih Status —</option>
+                            <option value="paid">Paid</option>
+                            <option value="unpaid">Unpaid</option>
+                        </select>
                     </div>
                 </div>
 

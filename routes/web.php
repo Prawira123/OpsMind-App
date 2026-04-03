@@ -7,6 +7,7 @@ use App\Http\Controllers\Tenant\AccountController;
 use App\Http\Controllers\Tenant\CategoryController;
 use App\Http\Controllers\Tenant\ChartOfAccountController;
 use App\Http\Controllers\Tenant\ClientController;
+use App\Http\Controllers\Tenant\InvoiceController;
 use App\Http\Controllers\Tenant\NotificationController;
 use App\Http\Controllers\Tenant\TransactionController;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,8 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+Route::get('download-invoice/{token}', [InvoiceController::class, 'publicDownload'])->name('invoices.public-download');
 
 // Route::get('/test-log', function () {
 //     Log::info('test log berhasil');
@@ -79,8 +82,13 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
     Route::get('notifications/{id}', [NotificationController::class, 'show'])
      ->name('notifications.show');
 
-     //Transaction Route 
-     Route::resource('transactions', TransactionController::class)->only(['index', 'create' ,'store', 'show', 'edit', 'update', 'destroy']);
+      //Transaction Route 
+      Route::resource('transactions', TransactionController::class)->only(['index', 'create' ,'store', 'show', 'edit', 'update', 'destroy']);
+
+      //Invoice Route
+      Route::get('invoices/{id}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+      Route::patch('invoices/{id}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
+      Route::resource('invoices', InvoiceController::class);
 });
 
 require __DIR__.'/auth.php';

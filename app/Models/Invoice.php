@@ -23,7 +23,7 @@ class Invoice extends Model
     }
 
     protected $fillable = [
-        'tenant_id', 'client_id', 'created_by', 'number', 'issue_date', 'due_date', 'tax', 'status','total', 'subtotal', 'notes', 'public_token'
+        'tenant_id', 'client_id', 'created_by', 'number', 'issue_date', 'due_date', 'tax', 'status','total', 'subtotal', 'notes', 'public_token', 'transaction_id'
     ];
 
     protected $casts = [
@@ -66,5 +66,9 @@ class Invoice extends Model
 
     public function items(){
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function transaction(){
+        return $this->belongsTo(Transaction::class);
     }
 }

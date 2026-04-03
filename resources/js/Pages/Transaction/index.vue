@@ -15,6 +15,7 @@ import BadgeSuccess from '@/Components/Partials/BadgeSuccess.vue'
 const props = defineProps({
     transactions: Array,
     status:       String,
+    summary:      Object,
 })
 
 // =========================================================
@@ -221,6 +222,54 @@ watch(() => props.status, (val) => {
         <!-- STATUS BADGE -->
         <div v-if="showStatus">
             <BadgeSuccess :status="props.status"/>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+            <div class="rounded-xl bg-white dark:bg-gray-900 border
+                        border-gray-200 dark:border-gray-800 p-5 shadow-sm">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                    Saldo Total
+                </p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ formatCurrency(summary.total_balance) }}
+                </p>
+                <div class="mt-2 h-1 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                    <div class="h-1 bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]" :style="{ width: '100%' }"></div>
+                </div>
+            </div>
+
+            <div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border
+                        border-emerald-100 dark:border-emerald-800 p-5 shadow-sm relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-emerald-500/10 transition-transform group-hover:scale-150"></div>
+                <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
+                    Total Pemasukan
+                </p>
+                <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                    {{ formatCurrency(summary.total_income) }}
+                </p>
+                <p class="text-xs text-emerald-500/70 mt-1 flex items-center gap-1">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    Uang masuk
+                </p>
+            </div>
+
+            <div class="rounded-xl bg-rose-50 dark:bg-rose-900/20 border
+                        border-rose-100 dark:border-rose-800 p-5 shadow-sm relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-rose-500/10 transition-transform group-hover:scale-150"></div>
+                <p class="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-1">
+                    Total Pengeluaran
+                </p>
+                <p class="text-2xl font-bold text-rose-700 dark:text-rose-400">
+                    {{ formatCurrency(summary.total_expense) }}
+                </p>
+                <p class="text-xs text-rose-500/70 mt-1 flex items-center gap-1">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                    Uang keluar
+                </p>
+            </div>
+
         </div>
 
         <!-- TABEL SECTION -->

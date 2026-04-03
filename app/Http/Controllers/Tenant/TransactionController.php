@@ -20,11 +20,18 @@ class TransactionController extends Controller
 {
 
     public function index(){
-        $transaction = Transaction::with('category')->get();
+        $transactions = Transaction::with('category')->get();
+
+        $summary = [
+            'total_income'  => $transactions->where('type', 'income')->sum('amountTotal'),
+            'total_expense' => $transactions->where('type', 'expense')->sum('amountTotal'),
+        ];
+        $summary['total_balance'] = $summary['total_income'] - $summary['total_expense'];
 
         return Inertia::render('Transaction/index', [
-            'status' => session('success'),
-            'transactions' => $transaction
+            'status'       => session('success'),
+            'transactions' => $transactions,
+            'summary'     => $summary
         ]);
     }
 

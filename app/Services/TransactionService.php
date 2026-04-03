@@ -6,12 +6,11 @@ use App\Models\Transaction;
 use App\Models\TransactionItem;
 use Illuminate\Support\Facades\Log;        // ← Ganti ini
 use Illuminate\Support\Facades\Auth;
-use PhpOffice\PhpSpreadsheet\Chart\Chart;
 use Illuminate\Support\Facades\DB;
 
 class TransactionService extends BaseService
 {
-    public function __construct( public Transaction $transaction, public TransactionItem $transaction_items, public JournalService $journalService, public ChartOfAccountService $chartOfAccountService, public AccountService $accountService)
+    public function __construct( public Transaction $transaction, public TransactionItem $transaction_items, public JournalService $journalService, public ChartOfAccountService $chartOfAccountService, public AccountService $accountService, public InvoiceService $invoiceService)
     {
     }
     
@@ -32,6 +31,7 @@ class TransactionService extends BaseService
                 'description' => $data['description'],
                 'type' => $data['type'],
                 'reference_no' => $data['reference_no'],
+                'status' => $data['status'],
                 'client_id' => $data['client_id'],
                 'created_by' => Auth::user()->id,
                 'tax_percent' => $data['tax_percent'],
@@ -45,6 +45,24 @@ class TransactionService extends BaseService
                         ...$item, 'transaction_id' => $transaction->id
                     ]);
                 }
+
+                if($data['type'] == 'income'){
+                    $this->invoiceService->store([
+                        'client_id' => $data['client_id'],
+                        'created_by' => Auth::user()->id,
+                        'number' => $data['reference_no'],
+                        'status' => $transaction->status,
+                        'issue_date' => $data['date'],
+                        'subtotal' => $amountTotal,
+                        'tax' => $data['tax_percent'],
+                        'total' => $amountTotal,
+                        'notes' => $data['description'],
+                        'transaction_id' => $transaction->id,
+                        'items' => $data['items'],
+                    ]);
+                }
+
+                Log::info('invoice selesai dibuat');
 
                 $this->journalService->storeJournalEntry([
                     'transaction_id' => $transaction->id,
@@ -148,6 +166,22 @@ class TransactionService extends BaseService
 
             Log::info("data items tersimpan");
 
+            if($data['type'] == 'income'){
+                $this->invoiceService->update($this->transaction->id, [
+                    'client_id' => $data['client_id'],
+                    'created_by' => Auth::user()->id,
+                    'number' => $data['reference_no'],
+                    'status' => 'send',
+                    'issue_date' => $data['date'],
+                    'subtotal' => $amountTotal,
+                    'tax' => $data['tax_percent'],
+                    'total' => $amountTotal,
+                    'notes' => $data['description'],
+                    'items' => $data['items'],
+                ]);
+            }
+            
+
             $this->chartOfAccountService->updateBalance([
                 [
                     'id' => $data['debit_account_id'],
@@ -210,6 +244,7 @@ class TransactionService extends BaseService
 
         $this->journalService->deleteJournalEntry($transaction->id);
         $this->transaction_items->where('transaction_id', $transaction->id)->delete();
+        $this->invoiceService->delete($transaction->id);
         $transaction->delete();
 
         return $transaction;

@@ -34,6 +34,7 @@ class TransactionUpdateRequest extends FormRequest
             'tax_percent'       => ['nullable', 'string'],
             'other_fee'         => ['nullable', 'numeric', 'min:0'],
             'rekening_id'       => ['required', 'exists:accounts,id'],
+            'status'            => ['required', 'in:unpaid,paid'],
 
             // Items — validasi array
             'items'                  => ['required', 'array', 'min:1'],

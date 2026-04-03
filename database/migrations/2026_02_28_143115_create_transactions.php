@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->enum('type', ['expense', 'income'])->default('expense');
+            $table->enum('status', ['unpaid', 'paid'])->default('unpaid');
             $table->string('description');
             $table->decimal('amountTotal', 30, 2);
             $table->date('date');
