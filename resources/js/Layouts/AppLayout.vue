@@ -26,14 +26,7 @@ const avatarInitial = computed(() =>
 const isActive = (routeName) => {
     if (!routeName) return false
     try {
-        if (route().current(routeName)) return true
-
-        // Cek wildcard — ambil prefix sebelum titik terakhir
-        // 'accounts.index' → cek 'accounts.*'
-        const prefix = routeName.split('.').slice(0, -1).join('.')
-        if (prefix) return route().current(`${prefix}.*`)
-
-        return false
+        return route().current(routeName)
     } catch {
         return false
     }
