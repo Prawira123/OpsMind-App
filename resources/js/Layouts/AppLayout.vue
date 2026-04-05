@@ -103,7 +103,7 @@ const navigation = [
     {
         name:      'Invoice',
         routeName: 'invoices.index',
-        href:      route('invoices.index'),
+        href:      route('invoices.index') ,
         icon:      `<path stroke-linecap="round" stroke-linejoin="round"
                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
                             a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2
@@ -118,10 +118,10 @@ const navigation = [
                             002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2
                             2 0 01-2 2h-2a2 2 0 01-2-2z"/>`,
         children: [
-            { name: 'Laba Rugi',  routeName: 'reports.income',   href: '#' },
-            { name: 'Neraca',     routeName: 'reports.balance',  href: '#' },
-            { name: 'Arus Kas',   routeName: 'reports.cashflow', href: '#' },
-            { name: 'Buku Besar', routeName: 'reports.ledger',   href: '#' },
+            { name: 'Laba Rugi',  routeName: 'reports.income',   href: route('reports.income') },
+            { name: 'Neraca',     routeName: 'reports.balance',  href: route('reports.balance') },
+            { name: 'Arus Kas',   routeName: 'reports.cashflow', href: route('reports.cashflow') },
+            { name: 'Buku Besar', routeName: 'reports.ledger',   href: route('reports.ledger') },
         ],
     },
     {

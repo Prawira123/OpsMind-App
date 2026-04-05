@@ -69,16 +69,15 @@ class JournalEntry extends Model
         return $this->hasMany(JournalEntryDetail::class);
     }
 
-    // Helper: hitung total debit (harus selalu = total kredit)
     public function getTotalDebitAttribute(): float
     {
-        return $this->lines->sum('debit');
+        return $this->lines->where('type', 'debit')->sum('amount');
     }
 
     // Helper: hitung total kredit
     public function getTotalCreditAttribute(): float
     {
-        return $this->lines->sum('credit');
+        return $this->lines->where('type', 'credit')->sum('amount');
     }
 
     // Helper: cek apakah jurnal balance (debit = kredit)

@@ -8,6 +8,7 @@ use App\Http\Controllers\Tenant\CategoryController;
 use App\Http\Controllers\Tenant\ChartOfAccountController;
 use App\Http\Controllers\Tenant\ClientController;
 use App\Http\Controllers\Tenant\InvoiceController;
+use App\Http\Controllers\Tenant\LaporanController;
 use App\Http\Controllers\Tenant\NotificationController;
 use App\Http\Controllers\Tenant\TransactionController;
 use Illuminate\Foundation\Application;
@@ -89,6 +90,14 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
       Route::get('invoices/{id}/download', [InvoiceController::class, 'download'])->name('invoices.download');
       Route::patch('invoices/{id}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
       Route::resource('invoices', InvoiceController::class);
+
+      //Report Route
+      Route::prefix('reports')->group(function(){
+          Route::get('laba-rugi', [LaporanController::class, 'getLabaRugi'])->name('reports.income');
+          Route::get('neraca', [LaporanController::class, 'getNeraca'])->name('reports.balance');
+          Route::get('arus-kas', [LaporanController::class, 'getArusKas'])->name('reports.cashflow');
+          Route::get('buku-besar', [LaporanController::class, 'getBukuBesar'])->name('reports.ledger');
+      });
 });
 
 require __DIR__.'/auth.php';

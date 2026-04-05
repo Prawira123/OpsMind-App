@@ -191,9 +191,9 @@ const handleNotificationClick = (notif) => {
                     <!-- Icon -->
                     <div :class="[
                         'h-10 w-10 rounded-xl flex items-center justify-center text-lg shrink-0 mt-0.5',
-                        getConfig(notif.data?.type).color,
+                        getConfig(notif.type).color,
                     ]">
-                        {{ getConfig(notif.data?.type).icon }}
+                        {{ getConfig(notif.type).icon }}
                     </div>
 
                     <!-- Content -->
@@ -224,8 +224,8 @@ const handleNotificationClick = (notif) => {
                                         {{ notif.time }}
                                     </span>
                                     <a
-                                        v-if="notif.data?.url"
-                                        :href="notif.data.url"
+                                        v-if="notif.url"
+                                        :href="notif.url"
                                         class="text-xs text-indigo-600 dark:text-indigo-400
                                                hover:underline font-medium"
                                     >
