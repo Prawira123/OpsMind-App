@@ -31,12 +31,14 @@ class CheckInvoiceOverdue extends Command
     {
         \Log::info('Scheduler jalan: cek invoice overdue');
 
-        $invoices = Invoice::with(['client', 'createdBy'])
+        /** @var \Illuminate\Database\Eloquent\Collection<int, Invoice> $invoices */
+        $invoices = Invoice::query()->with(['client', 'createdBy'])
         ->where('status', 'send')
         ->where('due_date', '<', now())
         ->get();
 
         foreach($invoices as $invoice){
+            /** @var Invoice $invoice */
             $invoice->update([
                 'status' => 'overdue'
             ]);

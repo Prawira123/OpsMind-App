@@ -493,8 +493,7 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
 
                 <div class="flex items-center gap-2">
 
-                    <!-- AI ASSISTANT -->
-                    <a href="#"
+                    <Link :href="route('ai.index')"
                        class="relative flex items-center gap-2 rounded-lg px-3 py-1.5
                               bg-gradient-to-r from-violet-600 to-indigo-600
                               hover:from-violet-500 hover:to-indigo-500
@@ -518,7 +517,7 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                                          rounded-full bg-white/70"/>
                             <span class="relative inline-flex h-2 w-2 rounded-full bg-white"/>
                         </span>
-                    </a>
+                    </Link>
 
                     <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"/>
 

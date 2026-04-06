@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AIController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionController;
@@ -46,26 +47,26 @@ Route::get('download-invoice/{token}', [InvoiceController::class, 'publicDownloa
 route::get('/SubscriptionPlan', [SubscriptionController::class, 'index'])->name('subs.index')->middleware('auth');
 route::post('/SubscriptionPlan', [SubscriptionController::class, 'select'])->name('subs.select')->middleware('auth');
 
-Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'SubscriptionActive'])->group(function(){
+Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'SubscriptionActive'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     //Account Route
     Route::delete('accounts/bulk-destroy', [AccountController::class, 'bulkDestroy'])
-     ->name('accounts.bulk-destroy')->middleware(['throttle:60,1']);
-    Route::resource('accounts', AccountController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+        ->name('accounts.bulk-destroy')->middleware(['throttle:60,1']);
+    Route::resource('accounts', AccountController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
     //Category Route
     Route::delete('categories/bulk-destroy', [CategoryController::class, 'bulkDestroy'])->middleware(['throttle:60,1'])
-    ->name('categories.bulk-destroy');
-    Route::resource('categories', CategoryController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+        ->name('categories.bulk-destroy');
+    Route::resource('categories', CategoryController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
     //Chart of accounts Route
     Route::delete('CoA/bulk-destroy', [ChartOfAccountController::class, 'bulkDestroy'])->middleware(['throttle:60,1'])
-    ->name('CoA.bulk-destroy');
-    Route::resource('chart-of-accounts', ChartOfAccountController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+        ->name('CoA.bulk-destroy');
+    Route::resource('chart-of-accounts', ChartOfAccountController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
     //Client Route
-    Route::resource('clients', ClientController::class)->only(['index', 'create' ,'store', 'edit', 'update', 'destroy']);
+    Route::resource('clients', ClientController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
     //Profile route
     Route::resource('profiles', ProfileController::class)->only(['index']);
@@ -79,25 +80,29 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
     Route::patch('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
     Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])
-     ->name('notifications.destroy');
+        ->name('notifications.destroy');
     Route::get('notifications/{id}', [NotificationController::class, 'show'])
-     ->name('notifications.show');
+        ->name('notifications.show');
 
-      //Transaction Route 
-      Route::resource('transactions', TransactionController::class)->only(['index', 'create' ,'store', 'show', 'edit', 'update', 'destroy']);
+    //Transaction Route 
+    Route::resource('transactions', TransactionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
 
-      //Invoice Route
-      Route::get('invoices/{id}/download', [InvoiceController::class, 'download'])->name('invoices.download');
-      Route::patch('invoices/{id}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
-      Route::resource('invoices', InvoiceController::class);
+    //Invoice Route
+    Route::get('invoices/{id}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+    Route::patch('invoices/{id}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
+    Route::resource('invoices', InvoiceController::class);
 
-      //Report Route
-      Route::prefix('reports')->group(function(){
-          Route::get('laba-rugi', [LaporanController::class, 'getLabaRugi'])->name('reports.income');
-          Route::get('neraca', [LaporanController::class, 'getNeraca'])->name('reports.balance');
-          Route::get('arus-kas', [LaporanController::class, 'getArusKas'])->name('reports.cashflow');
-          Route::get('buku-besar', [LaporanController::class, 'getBukuBesar'])->name('reports.ledger');
-      });
+    //Report Route
+    Route::prefix('reports')->group(function () {
+        Route::get('laba-rugi', [LaporanController::class, 'getLabaRugi'])->name('reports.income');
+        Route::get('neraca', [LaporanController::class, 'getNeraca'])->name('reports.balance');
+        Route::get('arus-kas', [LaporanController::class, 'getArusKas'])->name('reports.cashflow');
+        Route::get('buku-besar', [LaporanController::class, 'getBukuBesar'])->name('reports.ledger');
+    });
+
+    //AI Route
+    Route::get('ai', [AIController::class, 'index'])->name('ai.index');
+    Route::post('ai/chat', [AIController::class, 'chat'])->name('ai.chat');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
