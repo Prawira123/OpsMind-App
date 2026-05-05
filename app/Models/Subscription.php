@@ -57,7 +57,7 @@ class Subscription extends Model
 
     public function plan()
     {
-        return $this->belongsTo(SubscriptionPlan::class, 'plan_id');
+        return $this->belongsTo(SubscriptionPlan::class, 'subs_plan_id');
     }
 
     // Cek apakah subscription masih aktif

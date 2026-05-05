@@ -21,7 +21,7 @@ class OTPController extends Controller
         }elseif($type === 'two_factor'){
             $email = session('two_factor_email');
         }else{
-            $email = Auth::user()->email;
+            $email = Auth::user()->email;                                                                                
         }
 
         return Inertia::render('Auth/Otp', [

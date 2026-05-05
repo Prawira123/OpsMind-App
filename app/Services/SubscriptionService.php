@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
+use App\Notifications\SubscriptionMail;
+use App\Notifications\SuscriptionNotification;
 use Illuminate\Support\Facades\Auth;
 use Midtrans\Snap;
 use Midtrans\Transaction;
@@ -61,10 +63,21 @@ class SubscriptionService extends BaseService
             ]
         );
 
+        $subscriptionBefore = $this->subscription->where('tenant_id', Auth::user()->tenant_id)
+            ->where('id', '!=', $subscription->id)
+            ->where('status', 'active')
+            ->first();
+
+        $subscriptionBefore?->update(['status' => 'expired']);
+
         Tenant::where('id', Auth::user()->tenant_id)
           ->firstOrFail()
           ->update(['subs_id' => $subscription->id]);
 
+        $user = Auth::user();
+        $user->notify(new SuscriptionNotification($user, $subscription->plan));
+        $user->notify(new SubscriptionMail($user, $subscription));
+        
         return [
             'snap_token' => $snapToken,
             'order_id' => $order_id

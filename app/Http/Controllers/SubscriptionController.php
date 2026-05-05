@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Notifications\SuscriptionNotification;
 use App\Services\SubscriptionService;
@@ -17,7 +18,7 @@ class SubscriptionController extends Controller
                               ->orderBy('price')
                               ->get();
 
-        $currentSubscription = \App\Models\Subscription::with('plan')
+        $currentSubscription = Subscription::with('plan')
             ->where('tenant_id', auth()->user()->tenant_id)
             ->where('status', 'active')
             ->first();
@@ -25,7 +26,7 @@ class SubscriptionController extends Controller
         return Inertia::render('Subscription/index', [
             'plans' => $plans,
             'currentSubscription' => $currentSubscription,
-        ]);
+    ]);
     }
 
     public function select(Request $request, SubscriptionService $subscriptionService){

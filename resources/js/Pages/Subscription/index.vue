@@ -1,12 +1,15 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
+import Swal from 'sweetalert2'
 import dayjs from 'dayjs'
 
 const props = defineProps({
     plans: { type: Array, default: () => [] },
     currentSubscription: { type: Object, default: null }
 })
+
+console.log(props.currentSubscription)
 
 // =========================================================
 // BILLING TOGGLE
@@ -156,7 +159,17 @@ const selectPlan = (plan) => {
     // If there is an active subscription and selecting a different plan, show confirmation
     if (props.currentSubscription && props.currentSubscription.status === 'active') {
         pendingPlan.value = plan
-        showModal.value = true
+        Swal.fire({
+            title: 'Konfirmasi Perubahan Paket',
+            text: `Anda akan beralih ke paket ${plan.name}. Langganan saat ini (${props.currentSubscription.plan.name}) akan diakhiri dan statusnya akan menjadi expired. Setelah pembayaran berhasil, langganan baru akan aktif. Apakah Anda yakin ingin melanjutkan?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Lanjutkan',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            result.isConfirmed ? confirmSwitch() : cancelSwitch()
+        })
+
         return
     }
 
@@ -170,7 +183,7 @@ const submitPlan = (plan) => {
 }
 
 const confirmSwitch = () => {
-    showModal.value = false
+    // showModal.value = false
     if (pendingPlan.value) {
         form.plan_id = pendingPlan.value.id
         form.expire_current = true
@@ -180,7 +193,7 @@ const confirmSwitch = () => {
 }
 
 const cancelSwitch = () => {
-    showModal.value = false
+    // showModal.value = false
     pendingPlan.value = null
 }
 
@@ -389,7 +402,7 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
 
                     <!-- Feature list -->
                     <div :class="[
-                        'p-6 flex flex-col gap-6',
+                        'p-6 flex h-full flex-col gap-6',
                         getConfig(plan.name).highlight
                             ? 'bg-white dark:bg-gray-900'
                             : 'bg-white dark:bg-gray-900',
