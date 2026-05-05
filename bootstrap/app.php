@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'setCurrentTenant' => \App\Http\Middleware\SetCurrentTenant::class,
             'SubscriptionActive' => \App\Http\Middleware\SubscriptionMiddleware::class
         ]);
+        $middleware->validateCsrfTokens(except: [
+            '/midtrans/notification'
+        ]);
 
         //
     })

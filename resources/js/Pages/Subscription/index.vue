@@ -1,9 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
+import dayjs from 'dayjs'
 
 const props = defineProps({
     plans: { type: Array, default: () => [] },
+    currentSubscription: { type: Object, default: null }
 })
 
 // =========================================================
@@ -74,7 +76,7 @@ const planConfig = {
     },
 }
 
-// Fitur highlight per plan (untuk tampilan lebih clean)
+// Fitur highlight per plan
 const planHighlights = {
     Starter: [
         { icon: '📊', text: 'Dashboard & Laporan Dasar' },
@@ -105,20 +107,81 @@ const planHighlights = {
 }
 
 // =========================================================
+// MODAL STATE
+// =========================================================
+const showModal = ref(false)
+const pendingPlan = ref(null)
+
+// =========================================================
+// FORM
+// =========================================================
+const form = useForm({
+    plan_id: null,
+    paid_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    ends_at: null,
+    expire_current: false,
+})
+
+watch(billing, (val) => {
+    form.ends_at = val === 'monthly'
+        ? dayjs().add(1, 'month').format('YYYY-MM-DD HH:mm:ss')
+        : dayjs().add(1, 'year').format('YYYY-MM-DD HH:mm:ss')
+}, { immediate: true })
+
+// =========================================================
+// CURRENT SUBSCRIPTION HELPERS
+// =========================================================
+const isCurrentPlan = (plan) => {
+    return props.currentSubscription &&
+        props.currentSubscription.status === 'active' &&
+        props.currentSubscription.plan &&
+        props.currentSubscription.plan.id === plan.id
+}
+
+const disableFreePlan = computed(() => {
+    if (!props.currentSubscription) return false
+    if (props.currentSubscription.status !== 'active') return false
+    if (!props.currentSubscription.plan) return false
+    // If current is paid, disable free button
+    return parseFloat(props.currentSubscription.plan.price) > 0
+})
+
+// =========================================================
 // SELECT PLAN
 // =========================================================
-const form = useForm({ plan_id: null })
-
 const selectPlan = (plan) => {
-    if (parseFloat(plan.price) === 0) {
-        // Free plan → langsung ke dashboard
-        form.plan_id = plan.id
-        form.post(route('subs.select'))
-    } else {
-        // Paid plan → ke pembayaran
-        form.plan_id = plan.id
-        form.post(route('subs.payment'))
+    // If clicking current active plan, do nothing
+    if (isCurrentPlan(plan)) return
+
+    // If there is an active subscription and selecting a different plan, show confirmation
+    if (props.currentSubscription && props.currentSubscription.status === 'active') {
+        pendingPlan.value = plan
+        showModal.value = true
+        return
     }
+
+    submitPlan(plan)
+}
+
+const submitPlan = (plan) => {
+    form.plan_id = plan.id
+    form.expire_current = false // default
+    form.post(route('subs.select'))
+}
+
+const confirmSwitch = () => {
+    showModal.value = false
+    if (pendingPlan.value) {
+        form.plan_id = pendingPlan.value.id
+        form.expire_current = true
+        form.post(route('subs.select'))
+        pendingPlan.value = null
+    }
+}
+
+const cancelSwitch = () => {
+    showModal.value = false
+    pendingPlan.value = null
 }
 
 const getConfig = (planName) => planConfig[planName] ?? planConfig.Starter
@@ -128,6 +191,47 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
 <template>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
 
+        <!-- Back to Dashboard Button -->
+        <div class="max-w-6xl mx-auto px-4 pt-6">
+            <Link
+                href="/dashboard"
+                class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Kembali ke Dashboard
+            </Link>
+        </div>
+
+        <!-- Current Subscription Info -->
+        <div v-if="currentSubscription && currentSubscription.status === 'active'" class="max-w-6xl mx-auto px-4 pt-6">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Langganan Saat Ini
+                        </h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Paket: <span class="font-medium text-gray-900 dark:text-white">{{ currentSubscription?.plan?.name || 'Tidak ditemukan' }}</span>
+                            <span class="ml-2 inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                                Aktif
+                            </span>
+                        </p>
+                        <p class="mt-1 text-xs text-gray-400">
+                            Berakhir: {{ new Date(currentSubscription.ends_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+                        </p>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                            {{ formatPrice(currentSubscription?.plan?.price || 0) }}
+                            <span class="text-sm font-normal text-gray-500">/{{ currentSubscription?.plan?.billing_cycle === 'monthly' ? 'bulan' : 'tahun' }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ================================================ -->
         <!-- HEADER -->
         <!-- ================================================ -->
@@ -135,15 +239,9 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
 
             <!-- Logo / Brand -->
             <div class="flex items-center justify-center gap-2 mb-10">
-                <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center
-                            justify-center">
-                    <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002
-                                 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6
-                                 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0
-                                 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+                    <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
                 <span class="text-xl font-bold text-gray-900 dark:text-white">
@@ -151,8 +249,7 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                 </span>
             </div>
 
-            <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white
-                       tracking-tight mb-3">
+            <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-3">
                 Pilih Paket yang Tepat
             </h1>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
@@ -161,9 +258,7 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
             </p>
 
             <!-- Billing Toggle -->
-            <div class="mt-8 inline-flex items-center gap-3 rounded-2xl
-                        bg-white dark:bg-gray-900 border border-gray-200
-                        dark:border-gray-800 p-1.5 shadow-sm">
+            <div class="mt-8 inline-flex items-center gap-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-1.5 shadow-sm">
                 <button
                     @click="billing = 'monthly'"
                     :class="[
@@ -227,16 +322,13 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                     >
                         <!-- Badge -->
                         <div class="flex items-center justify-between mb-4">
-                            <span class="inline-flex items-center rounded-full
-                                         bg-white/20 backdrop-blur-sm px-3 py-1
-                                         text-xs font-bold text-white">
+                            <span class="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-bold text-white">
                                 ⭐ {{ getConfig(plan.name).badge }}
                             </span>
                             <!-- Yearly saving badge -->
                             <span
                                 v-if="billing === 'yearly' && yearlyDiscount(plan.name)"
-                                class="inline-flex items-center rounded-full
-                                       bg-white/20 px-2.5 py-1 text-xs font-semibold text-white"
+                                class="inline-flex items-center rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold text-white"
                             >
                                 Hemat {{ yearlyDiscount(plan.name) }}
                             </span>
@@ -250,14 +342,12 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                             <span class="text-4xl font-black text-white">
                                 {{ formatPrice(plan.price) }}
                             </span>
-                            <span v-if="parseFloat(plan.price) > 0"
-                                  :class="['text-sm pb-1.5', getConfig(plan.name).accentColor]">
+                            <span v-if="parseFloat(plan.price) > 0" :class="['text-sm pb-1.5', getConfig(plan.name).accentColor]">
                                 /{{ billing === 'monthly' ? 'bulan' : 'tahun' }}
                             </span>
                         </div>
 
-                        <p v-if="billing === 'yearly' && parseFloat(plan.price) > 0"
-                           class="text-xs text-white/70 mt-1">
+                        <p v-if="billing === 'yearly' && parseFloat(plan.price) > 0" class="text-xs text-white/70 mt-1">
                             ~{{ formatPrice(parseFloat(plan.price) / 12) }}/bulan
                         </p>
                     </div>
@@ -273,16 +363,13 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                         <div class="flex items-center justify-between mb-4 h-6">
                             <span
                                 v-if="billing === 'yearly' && yearlyDiscount(plan.name)"
-                                class="inline-flex items-center rounded-full bg-emerald-100
-                                       dark:bg-emerald-900/30 px-2.5 py-1 text-xs
-                                       font-semibold text-emerald-700 dark:text-emerald-400"
+                                class="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
                             >
                                 Hemat {{ yearlyDiscount(plan.name) }}
                             </span>
                         </div>
 
-                        <h2 class="text-2xl font-extrabold text-gray-900
-                                   dark:text-white mb-1">
+                        <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">
                             {{ plan.name }}
                         </h2>
 
@@ -290,14 +377,12 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                             <span class="text-4xl font-black text-gray-900 dark:text-white">
                                 {{ formatPrice(plan.price) }}
                             </span>
-                            <span v-if="parseFloat(plan.price) > 0"
-                                  class="text-sm text-gray-500 dark:text-gray-400 pb-1.5">
+                            <span v-if="parseFloat(plan.price) > 0" class="text-sm text-gray-500 dark:text-gray-400 pb-1.5">
                                 /{{ billing === 'monthly' ? 'bulan' : 'tahun' }}
                             </span>
                         </div>
 
-                        <p v-if="parseFloat(plan.price) === 0"
-                           class="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                        <p v-if="parseFloat(plan.price) === 0" class="text-sm text-gray-400 dark:text-gray-500 mt-1">
                             Untuk memulai, tanpa kartu kredit
                         </p>
                     </div>
@@ -327,8 +412,9 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
 
                         <!-- CTA Button -->
                         <button
+                            v-if="!isCurrentPlan(plan)"
                             @click="selectPlan(plan)"
-                            :disabled="form.processing && form.plan_id === plan.id"
+                            :disabled="(form.processing && form.plan_id === plan.id) || (parseFloat(plan.price) === 0 && disableFreePlan)"
                             :class="[
                                 'w-full rounded-xl py-3 px-6 text-sm font-semibold',
                                 'transition-all duration-200 flex items-center justify-center gap-2',
@@ -347,25 +433,16 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                                 class="h-4 w-4 animate-spin"
                                 fill="none" viewBox="0 0 24 24"
                             >
-                                <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"/>
-                                <path class="opacity-75" fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                             </svg>
 
                             <!-- Icon -->
-                            <svg v-else-if="parseFloat(plan.price) === 0"
-                                 class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            <svg v-else-if="parseFloat(plan.price) === 0" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                             </svg>
-                            <svg v-else
-                                 class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M3 10h18M7 16h1m4 0h1m-7 4h12a3 3 0 003-3V8a3
-                                         3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            <svg v-else class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 16h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                             </svg>
 
                             {{
@@ -377,14 +454,24 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                             }}
                         </button>
 
+                        <!-- Current Plan Badge -->
+                        <div
+                            v-else
+                            class="w-full rounded-xl py-3 px-6 text-sm font-semibold text-center bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                        >
+                            ✅ Paket Saat Ini
+                        </div>
+
                         <!-- Note untuk free plan -->
-                        <p v-if="parseFloat(plan.price) === 0"
-                           class="text-center text-xs text-gray-400">
+                        <p v-if="parseFloat(plan.price) === 0 && !isCurrentPlan(plan)" class="text-center text-xs text-gray-400">
                             Tidak perlu kartu kredit
+                        </p>
+                        <p v-if="parseFloat(plan.price) === 0 && disableFreePlan" class="text-center text-xs text-red-500">
+                            Nonaktif karena Anda memiliki langganan berbayar
                         </p>
 
                         <!-- Note untuk paid plan -->
-                        <p v-else class="text-center text-xs text-gray-400">
+                        <p v-if="parseFloat(plan.price) > 0 && !isCurrentPlan(plan)" class="text-center text-xs text-gray-400">
                             Pembayaran aman via Midtrans
                         </p>
                     </div>
@@ -397,47 +484,77 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
             <!-- ============================================ -->
             <div class="mt-16 text-center">
                 <div class="flex flex-wrap items-center justify-center gap-8">
-                    <div class="flex items-center gap-2 text-sm text-gray-500
-                                dark:text-gray-400">
-                        <svg class="h-4 w-4 text-emerald-500" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955
-                                     11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824
-                                     10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                         Pembayaran Aman & Terenkripsi
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-500
-                                dark:text-gray-400">
-                        <svg class="h-4 w-4 text-emerald-500" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11
-                                     11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
                         Batalkan Kapanpun
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-500
-                                dark:text-gray-400">
-                        <svg class="h-4 w-4 text-emerald-500" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172
-                                     9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9
-                                     0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                         Support 7 Hari
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-500
-                                dark:text-gray-400">
-                        <svg class="h-4 w-4 text-emerald-500" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714
-                                     2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                         </svg>
                         Upgrade / Downgrade Bebas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================ -->
+        <!-- CONFIRMATION MODAL -->
+        <!-- ================================================ -->
+        <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
+            <!-- Overlay -->
+            <div class="fixed inset-0 bg-black/50 transition-opacity" @click="cancelSwitch"></div>
+
+            <!-- Modal -->
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6">
+                    <!-- Icon -->
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 mb-4">
+                        <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.364 5.636A9 9 0 1117.364 4.636 9 9 0 013.636 17.364z"/>
+                        </svg>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white text-center">
+                        Ubah Paket Langganan
+                    </h3>
+
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+                        Anda akan beralih ke paket <span class="font-medium text-gray-900 dark:text-white">{{ pendingPlan?.name }}</span>.
+                        Langganan saat ini (<span class="font-medium">{{ currentSubscription?.plan?.name }}</span>) akan diakhiri dan statusnya akan menjadi <span class="font-medium">expired</span>.
+                    </p>
+
+                    <p class="mt-4 text-xs text-gray-400 text-center">
+                        Setelah pembayaran berhasil, langganan baru akan aktif.
+                    </p>
+
+                    <div class="mt-6 flex gap-3">
+                        <button
+                            @click="cancelSwitch"
+                            class="flex-1 rounded-xl py-2.5 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            @click="confirmSwitch"
+                            class="flex-1 rounded-xl py-2.5 px-4 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                        >
+                            Ya, Lanjutkan
+                        </button>
                     </div>
                 </div>
             </div>

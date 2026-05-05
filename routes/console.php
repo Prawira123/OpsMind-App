@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('app:check-invoice-overdue')->everyMinute();
+Schedule::command('subscriptions:detect-expired')->hourly();

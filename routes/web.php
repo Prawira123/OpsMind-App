@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AIController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Tenant\AccountController;
@@ -46,6 +47,10 @@ Route::get('download-invoice/{token}', [InvoiceController::class, 'publicDownloa
 
 route::get('/SubscriptionPlan', [SubscriptionController::class, 'index'])->name('subs.index')->middleware('auth');
 route::post('/SubscriptionPlan', [SubscriptionController::class, 'select'])->name('subs.select')->middleware('auth');
+Route::get('/checkout', [SubscriptionController::class, 'checkout'])->name('payment.checkout')->middleware('auth');
+Route::get('/checkout/status', [SubscriptionController::class, 'checkStatus'])->name('payment.checkout.status')->middleware('auth');
+
+Route::post('/midtrans/notification', [MidtransController::class, 'notification'])->name('midtrans.notification');
 
 Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'SubscriptionActive'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
