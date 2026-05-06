@@ -1,6 +1,13 @@
 <script setup>
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
+
+defineProps({
+    footerText: {
+        type: String,
+        default: 'Welcome to your dashboard'
+    }
+});
 </script>
 
 <template>
@@ -44,7 +51,7 @@ import { Link } from '@inertiajs/vue3';
             <!-- Subtle footer text -->
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Welcome back to your dashboard
+                    {{ footerText }}
                 </p>
             </div>
         </div>

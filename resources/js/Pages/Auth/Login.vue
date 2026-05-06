@@ -32,7 +32,7 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
+    <GuestLayout footerText="Welcome back! Please sign in to your account">
         <Head title="Log in" />
 
         <form @submit.prevent="submit" class="space-y-6">
