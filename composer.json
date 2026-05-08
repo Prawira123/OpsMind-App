@@ -32,6 +32,7 @@
         "vladimir-yuldashev/laravel-queue-rabbitmq": "*"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^4.2",
         "fakerphp/faker": "^1.23",
         "laravel/breeze": "^2.3",
         "laravel/pail": "^1.2.2",
