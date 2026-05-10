@@ -27,11 +27,11 @@ class TransactionController extends Controller
             'total_expense' => $transactions->where('type', 'expense')->sum('amountTotal'),
         ];
         $summary['total_balance'] = $summary['total_income'] - $summary['total_expense'];
-
+        
         return Inertia::render('Transaction/index', [
             'status'       => session('success'),
-            'transactions' => $transactions,
-            'summary'     => $summary
+            'transactions' => Inertia::defer(fn () => $transactions),
+            'summary'     => Inertia::defer(fn () => $summary)
         ]);
     }
 
@@ -50,12 +50,20 @@ class TransactionController extends Controller
     }
 
     public function show($id){
-        $transaction = Transaction::with('category', 'client', 'debit_account', 'credit_account', 'transaction_items', 'createdBy')->find($id);
+        $transaction = Transaction::with([
+            'category', 
+            'client', 
+            'debit_account', 
+            'credit_account', 
+            'items', 
+            'createdBy', 
+            'journalEntry.lines.account'
+        ])->find($id);
 
         Log::info("langkah 1", ['id' => $id, 'transaction' => $transaction]);
 
         return Inertia::render('Transaction/show', [
-            'transaction' => $transaction
+            'transaction' => Inertia::defer(fn () => $transaction)
         ]);
     }
 

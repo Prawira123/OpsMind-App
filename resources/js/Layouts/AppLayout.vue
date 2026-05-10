@@ -26,6 +26,12 @@ const avatarInitial = computed(() =>
 const isActive = (routeName) => {
     if (!routeName) return false
     try {
+        // Jika routeName berakhiran .index, kita anggap itu grup CRUD
+        // dan kita ingin menu tetap aktif untuk semua route di grup tersebut (show, edit, etc.)
+        if (routeName.endsWith('.index')) {
+            const baseRoute = routeName.replace('.index', '')
+            return route().current(`${baseRoute}.*`)
+        }
         return route().current(routeName)
     } catch {
         return false

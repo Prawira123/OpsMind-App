@@ -79,7 +79,15 @@ class Transaction extends Model
         return $this->hasOne(Invoice::class);
     }
 
+    public function items(){
+        return $this->hasMany(TransactionItem::class);
+    }
+
     public function transaction_items(){
         return $this->hasMany(TransactionItem::class);
+    }
+
+    public function journalEntry(){
+        return $this->hasOne(JournalEntry::class);
     }
 }
