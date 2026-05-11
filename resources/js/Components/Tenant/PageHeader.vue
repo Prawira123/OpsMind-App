@@ -23,7 +23,7 @@
                 </p>
             </div>
 
-            <Link
+            <Link v-if="props.btnDesc"
                 :href="props.href"
                 class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5
                        text-sm font-semibold text-white shadow-sm

@@ -1,11 +1,19 @@
 <script setup>
-import { computed } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+import { computed, defineAsyncComponent } from 'vue'
+import { Link, router, Deferred } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
+import InvoiceDetailsSkeleton from '@/Components/Invoice/Skeletons/InvoiceDetailsSkeleton.vue'
+import InvoiceItemsSkeleton from '@/Components/Invoice/Skeletons/InvoiceItemsSkeleton.vue'
 
 const props = defineProps({
-    invoice: { type: Object, required: true },
+    invoice: { type: Object, required: false },
 })
+
+// =========================================================
+// COMPONENTS
+// =========================================================
+const InvoiceDetails = defineAsyncComponent(() => import('@/Components/Invoice/InvoiceDetails.vue'))
+const InvoiceItems   = defineAsyncComponent(() => import('@/Components/Invoice/InvoiceItems.vue'))
 
 const statusConfig = {
     draft:     { label: 'Draft',      color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',           border: 'border-gray-200 dark:border-gray-700' },
@@ -16,25 +24,13 @@ const statusConfig = {
 }
 
 const config = computed(() =>
-    statusConfig[props.invoice.status] ?? statusConfig.draft
+    props.invoice ? (statusConfig[props.invoice.status] ?? statusConfig.draft) : statusConfig.draft
 )
 
-const formatCurrency = (val) =>
-    new Intl.NumberFormat('id-ID', {
-        style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
-    }).format(val || 0)
-
-const formatDate = (val) => {
-    if (!val) return '—'
-    return new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit', month: 'long', year: 'numeric',
-    }).format(new Date(val))
-}
-
-const isPaid    = computed(() => props.invoice.status === 'paid')
-const isDraft   = computed(() => props.invoice.status === 'draft')
-const isOverdue = computed(() => props.invoice.status === 'overdue')
-const isSent    = computed(() => props.invoice.status === 'sent')
+const isPaid    = computed(() => props.invoice?.status === 'paid')
+const isDraft   = computed(() => props.invoice?.status === 'draft')
+const isOverdue = computed(() => props.invoice?.status === 'overdue')
+const isSent    = computed(() => props.invoice?.status === 'sent')
 
 const markAsPaid = () => {
     Swal.fire({
@@ -66,7 +62,7 @@ const deleteInvoice = () => {
         <!-- HEADER -->
         <div class="mb-6 flex items-center justify-between flex-wrap gap-3">
             <div class="flex items-center gap-4">
-                <a :href="route('invoices.index')"
+                <Link :href="route('invoices.index')"
                    class="flex h-9 w-9 items-center justify-center rounded-lg border
                           border-gray-200 dark:border-gray-700 text-gray-500
                           hover:bg-gray-100 dark:hover:bg-gray-800 transition">
@@ -74,8 +70,8 @@ const deleteInvoice = () => {
                          stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
                     </svg>
-                </a>
-                <div>
+                </Link>
+                <div v-if="invoice">
                     <div class="flex items-center gap-3">
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white font-mono">
                             {{ invoice.number }}
@@ -91,10 +87,14 @@ const deleteInvoice = () => {
                         Detail Invoice
                     </p>
                 </div>
+                <div v-else class="animate-pulse">
+                    <div class="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded mb-1"></div>
+                    <div class="h-4 w-32 bg-gray-100 dark:bg-gray-800/50 rounded"></div>
+                </div>
             </div>
 
             <!-- Action buttons -->
-            <div class="flex items-center gap-2">
+            <div v-if="invoice" class="flex items-center gap-2">
                 <a :href="route('invoices.download', invoice.id)"
                    class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2
                         text-sm font-semibold text-white hover:bg-indigo-500 transition">
@@ -151,174 +151,19 @@ const deleteInvoice = () => {
             </div>
         </div>
 
-        <div class="space-y-5">
-
-            <!-- CARD 1: HEADER INVOICE -->
-            <div class="rounded-2xl bg-white dark:bg-gray-900 border
-                        border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
-
-                <div :class="[
-                    'h-1.5',
-                    isPaid ? 'bg-emerald-500' : isOverdue ? 'bg-red-500' : 'bg-indigo-500',
-                ]"/>
-
-                <div class="p-6">
-                    <div class="flex items-start justify-between gap-6 flex-wrap">
-
-                        <!-- Klien -->
-                        <div>
-                            <p class="text-xs text-gray-400 mb-2">Ditagih kepada</p>
-                            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ invoice.client?.name ?? '—' }}
-                            </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ invoice.client?.email }}
-                            </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ invoice.client?.phone }}
-                            </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mt-1">
-                                {{ invoice.client?.address }}
-                            </p>
-                        </div>
-
-                        <!-- Info tanggal -->
-                        <div class="text-right space-y-3">
-                            <div>
-                                <p class="text-xs text-gray-400">Tanggal Invoice</p>
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                    {{ formatDate(invoice.issue_date) }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400">Jatuh Tempo</p>
-                                <p :class="[
-                                    'text-sm font-semibold',
-                                    isOverdue
-                                        ? 'text-red-600 dark:text-red-400'
-                                        : 'text-gray-900 dark:text-white',
-                                ]">
-                                    {{ formatDate(invoice.due_date) }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400">Total</p>
-                                <p class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">
-                                    {{ formatCurrency(invoice.total) }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notes -->
-                    <div v-if="invoice.notes"
-                         class="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/50
-                                border border-gray-100 dark:border-gray-700 px-4 py-3">
-                        <p class="text-xs text-gray-400 mb-1">Catatan</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300">{{ invoice.notes }}</p>
-                    </div>
+        <Deferred data="invoice">
+            <template #fallback>
+                <div class="space-y-5">
+                    <InvoiceDetailsSkeleton />
+                    <InvoiceItemsSkeleton />
                 </div>
+            </template>
+
+            <div v-if="invoice" class="space-y-5">
+                <InvoiceDetails :invoice="invoice" />
+                <InvoiceItems :invoice="invoice" />
             </div>
-
-            <!-- CARD 2: ITEM TABLE -->
-            <div class="rounded-xl bg-white dark:bg-gray-900 border
-                        border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
-
-                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800
-                            flex items-center justify-between">
-                    <h2 class="text-sm font-semibold text-gray-900 dark:text-white">
-                        Detail Item
-                    </h2>
-                    <span class="inline-flex items-center rounded-full bg-indigo-100
-                                 dark:bg-indigo-900/30 px-2.5 py-0.5 text-xs font-semibold
-                                 text-indigo-700 dark:text-indigo-400">
-                        {{ invoice.items?.length ?? 0 }} item
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-800/50">
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider w-8">#</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Nama</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Keterangan</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">Qty</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Harga</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                            <tr v-for="(item, index) in invoice.items" :key="item.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition">
-                                <td class="px-6 py-3.5">
-                                    <span class="h-6 w-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30
-                                                 text-indigo-600 dark:text-indigo-400 text-xs font-bold
-                                                 flex items-center justify-center">
-                                        {{ index + 1 }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3.5">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ item.name }}</p>
-                                </td>
-                                <td class="px-4 py-3.5">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.description || '—' }}</p>
-                                </td>
-                                <td class="px-4 py-3.5 text-center">
-                                    <span class="inline-flex items-center justify-center rounded-full
-                                                 bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5
-                                                 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                        {{ item.quantity }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3.5 text-right">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ formatCurrency(item.price) }}
-                                    </p>
-                                </td>
-                                <td class="px-4 py-3.5 text-right">
-                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                        {{ formatCurrency(item.total) }}
-                                    </p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Summary -->
-                <div class="border-t border-gray-100 dark:border-gray-800 px-6 py-5
-                            bg-gray-50/50 dark:bg-gray-800/30">
-                    <div class="ml-auto w-full sm:w-72 space-y-2.5">
-
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-500 dark:text-gray-400">Subtotal</span>
-                            <span class="font-medium text-gray-900 dark:text-white">
-                                {{ formatCurrency(invoice.subtotal) }}
-                            </span>
-                        </div>
-
-                        <div v-if="invoice.tax && parseFloat(invoice.tax) > 0"
-                             class="flex items-center justify-between text-sm">
-                            <span class="text-gray-500 dark:text-gray-400">Pajak {{ invoice.tax }}%</span>
-                            <span class="font-medium text-gray-900 dark:text-white">
-                                {{ formatCurrency(invoice.subtotal * (invoice.tax / 100)) }}
-                            </span>
-                        </div>
-
-                        <div class="border-t border-gray-200 dark:border-gray-700 pt-2.5"/>
-
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-bold text-gray-900 dark:text-white">Total</span>
-                            <span class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">
-                                {{ formatCurrency(invoice.total) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        </Deferred>
     </div>
 </template>
 

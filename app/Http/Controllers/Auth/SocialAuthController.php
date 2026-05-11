@@ -19,6 +19,9 @@ class SocialAuthController extends Controller
         if(!in_array($provider, $this->allowedProviders)){
             abort(404);
         }
+        if ($provider === 'github') {
+            return Socialite::driver($provider)->scopes(['read:user', 'user:email'])->redirect();
+        }
         return Socialite::driver($provider)->redirect();
     }
 

@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Services\InvoiceService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -24,7 +25,7 @@ class InvoiceController extends Controller
     public function index()
     {
         return Inertia::render('Invoice/index', [
-            'invoices' => Invoice::with('client')->latest()->get(),
+            'invoices' => Inertia::defer(fn () => Invoice::with('client')->latest()->get()),
             'status' => session('status'),
         ]);
     }
@@ -53,7 +54,7 @@ class InvoiceController extends Controller
     public function show($id)
     {
         return Inertia::render('Invoice/show', [
-            'invoice' => Invoice::with('client', 'items')->findOrFail($id),
+            'invoice' => Inertia::defer(fn () =>  Invoice::with('client', 'items')->findOrFail($id)),
         ]);
     }
 
@@ -77,6 +78,24 @@ class InvoiceController extends Controller
         $invoice = Invoice::findOrFail($id);
         $this->invoiceService->delete($invoice);
         return Redirect::route('invoices.index')->with('status', 'Invoice deleted successfully');
+    }
+
+    public function bulkDestroy(Request $request, InvoiceService $service) 
+    {   
+        $ids = $request->input('ids', []);  
+            
+        foreach ($ids as $id) {
+            $invoice = Invoice::find($id);
+
+            if($invoice && $invoice->tenant_id !== Auth::user()->tenant_id){
+                abort(403, 'Kamu tidak Punya Akses');
+            }
+
+            $service->delete($invoice->transaction_id); 
+        }
+
+        return redirect()->route('invoices.index')
+        ->with('success', count($ids) . ' invoice berhasil dihapus');
     }
 
     public function markAsPaid($id)

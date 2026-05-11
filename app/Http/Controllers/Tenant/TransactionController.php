@@ -4,17 +4,18 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Transaction\TransactionStoreRequest;
+use App\Models\Account;
 use App\Models\Category;
 use App\Models\ChartOfAccount;
 use App\Models\Client;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Services\TransactionService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Models\Account;
-
 use Inertia\Inertia;
+
 
 class TransactionController extends Controller
 {
@@ -125,5 +126,23 @@ class TransactionController extends Controller
         
         return redirect()->route('transactions.index')
                      ->with('success', 'Transaksi berhasil dihapus');
+    }
+
+    public function bulkDestroy(Request $request, TransactionService $service) 
+    {   
+        $ids = $request->input('ids', []);
+            
+        foreach ($ids as $id) {
+            $transaction = Transaction::find($id);
+
+            if($transaction && $transaction->tenant_id !== Auth::user()->tenant_id){
+                abort(403, 'Kamu tidak Punya Akses');
+            }
+
+            $service->delete($transaction->id); 
+        }
+
+        return redirect()->route('transactions.index')
+        ->with('success', count($ids) . ' transaksi berhasil dihapus');
     }
 }

@@ -54,10 +54,11 @@ class AuthService extends BaseService
             }
         }else{
             $user = User::create([
-                'name' => $socialiteUser->getName(),
+                'name' => $socialiteUser->getName() ?? $socialiteUser->getNickname(),
                 'email' => $socialiteUser->getEmail(),
                 'password' => bcrypt(Str::random(16)),
-                'email_verified_at' => now()
+                'email_verified_at' => now(),
+                'github_id' => $provider === 'github' ? $socialiteUser->getId() : null,
             ]);
 
             if (!$user->tenant_id) {
@@ -74,6 +75,10 @@ class AuthService extends BaseService
             'provider_id' => $socialiteUser->getId(),
             'avatar' => $socialiteUser->getAvatar() ?? null,
         ]);
+
+        if ($provider === 'github') {
+            $user->update(['github_id' => $socialiteUser->getId()]);
+        }
 
         return $user;
     }

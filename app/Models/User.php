@@ -31,6 +31,7 @@ class User extends Authenticatable
         'is_active',           // apakah akun aktif
         'two_factor_enabled',  // apakah 2FA diaktifkan
         'two_factor_secret',   // kunci 2FA (dienkripsi)
+        'github_id',
         'tenant_id',
     ];
 

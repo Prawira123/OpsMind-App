@@ -90,9 +90,16 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
         ->name('notifications.show');
 
     //Transaction Route 
-    Route::resource('transactions', TransactionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
-
+    Route::delete('transactions/bulk-destroy', [TransactionController::class, 'bulkDestroy'])
+        ->middleware(['throttle:60,1'])
+        ->name('transactions.bulk-destroy');
+    Route::resource('transactions', TransactionController::class)
+        ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
+        
     //Invoice Route
+    Route::delete('invoices/bulk-destroy', [InvoiceController::class, 'bulkDestroy'])
+        ->middleware(['throttle:60,1'])
+        ->name('invoices.bulk-destroy');
     Route::get('invoices/{id}/download', [InvoiceController::class, 'download'])->name('invoices.download');
     Route::patch('invoices/{id}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
     Route::resource('invoices', InvoiceController::class);
