@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\JournalEntry;
 use App\Models\JournalEntryDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class JournalService extends BaseService
 {
@@ -101,13 +102,14 @@ class JournalService extends BaseService
 
     public function deleteJournalEntry($id){
 
-        $journal_entry = $this->journalEntry->where('transaction_id', $id)->first();
-        $this->journalEntryDetail->where('journal_entry_id', $journal_entry->id)->delete();
+        return DB::transaction(function () use ($id) {
+            $journal_entry = $this->journalEntry->where('transaction_id', $id)->first();
+            $journal_entry->lines()->delete();
 
-        $journal_entry->delete();
+            $journal_entry->delete();
 
-        return $this->journalEntry;
-
+            return $this->journalEntry;
+        });
     }
 
     public function createEntryNumber($transaction_id){

@@ -34,18 +34,15 @@ const filterType = ref('all')
 const selected  = ref([])
 const selectAll = ref(false)
 
-const toggleSelectAll = (value) => {
-    selectAll.value = value
-    selected.value  = value ? [...(props.transactions ?? [])].map(t => t.id) : []
+const handleUpdateSelectAll = (val) => {
+    selectAll.value = val
+    // selected.value  = value ? [...(props.transactions ?? [])].map(t => t.id) : []
+
+    console.log(selected.value.length)
 }
 
-const toggleSelect = (id) => {
-    const idx = selected.value.indexOf(id)
-    const newSelected = [...selected.value]
-    if (idx === -1) newSelected.push(id)
-    else            newSelected.splice(idx, 1)
-    selected.value = newSelected
-    selectAll.value = newSelected.length === (props.transactions ?? []).length
+const handleUpdateSelected = (val) => {
+    selected.value = val
 }
 
 // =========================================================
@@ -169,8 +166,8 @@ watch(() => props.status, (val) => {
                 :selected="selected"
                 :search="search"
                 :filterType="filterType"
-                @update:selectAll="toggleSelectAll"
-                @update:selected="toggleSelect"
+                @update:selectAll="handleUpdateSelectAll"
+                @update:selected="handleUpdateSelected"
             />
         </div>
 

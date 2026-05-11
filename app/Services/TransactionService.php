@@ -75,6 +75,8 @@ class TransactionService extends BaseService
                     'amountTotal' => $amountTotal,
                 ]);
 
+                Log::info('journal selesai dibuat');
+
                 $this->chartOfAccountService->updateBalance([
                     [
                         'id' => $data['debit_account_id'],
@@ -88,10 +90,14 @@ class TransactionService extends BaseService
                     ]
                 ]);
 
+                Log::info('coa selesai di update');
+
                 $this->accountService->updateBalance($data['rekening_id'], [
                     'balance' => $amountTotal,
                     'type' => $data['type'],
                 ]);
+
+                Log::info('account selesai di update');
 
                 return $this->transaction;
             });
@@ -236,18 +242,33 @@ class TransactionService extends BaseService
     }
 
     public function delete($id){
-        $transaction = $this->transaction->find($id);
 
-        if (!$transaction) {
-            throw new \Exception("Transaksi dengan id {$id} tidak ditemukan");
-        }
+        return DB::transaction(function () use ($id){
+            $transaction = $this->transaction->find($id);
 
-        $this->journalService->deleteJournalEntry($transaction->id);
-        $this->transaction_items->where('transaction_id', $transaction->id)->delete();
-        $this->invoiceService->delete($transaction->id);
-        $transaction->delete();
+            if (!$transaction) {
+                throw new \Exception("Transaksi dengan id {$id} tidak ditemukan");
+            }
 
-        return $transaction;
+            $this->journalService->deleteJournalEntry($transaction->id);
+
+            Log::info("data journal terhapus");
+
+            $this->transaction_items->where('transaction_id', $transaction->id)->delete();
+
+            Log::info("data items terhapus");
+
+            if($transaction->type === 'income'){
+                $this->invoiceService->delete($transaction->id);
+            }
+
+            Log::info("data invoice terhapus");
+
+            $transaction->delete();
+
+            return $transaction;
+        });
+
     }
 
 }
