@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Support\Facades\Auth;
+use App\Observers\DashboardCacheObserver;
 
 class Account extends Model
 {
@@ -14,6 +15,7 @@ class Account extends Model
 
     public static function booted(): void{
         static::addGlobalScope(new TenantScope());
+        static::observe(DashboardCacheObserver::class);
 
         static::creating(function($model){
             if(Auth::check() && Auth::user()->tenant_id){

@@ -33,7 +33,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user() ? (function () use ($request) {
-                    $user = $request->user()->load('roles', 'permissions');
+                    $user = $request->user()->load('roles', 'permissions', 'tenant');
                     return [
                         'id' => $user->id,
                         'name' => $user->name,
@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
                         'is_active' => $user->is_active,
                         'two_factor_enabled' => $user->two_factor_enabled,
                         'tenant_id' => $user->tenant_id,
+                        'tenant' => $user->tenant,
                         'roles' => $user->getRoleNames(),
                         'permissions' => $user->getAllPermissions()->pluck('name'),
                     ];

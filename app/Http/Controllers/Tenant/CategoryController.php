@@ -17,7 +17,7 @@ class CategoryController extends Controller
         $categories = Category::all();
 
         return Inertia::render('Category/index', [
-            'categories' => $categories,
+            'categories' => Inertia::defer(fn () => $categories),
             'status' => session('success'),
             ]);
     }

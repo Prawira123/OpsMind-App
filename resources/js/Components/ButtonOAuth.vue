@@ -2,7 +2,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
         <!-- Google Login -->
         <a href="/auth/google"
-            class="flex justify-center items-center gap-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl p-3 font-medium shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+            class="flex justify-center items-center gap-3 bg-white dark:bg-white text-gray-700 dark:text-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 font-medium shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
             <img src="https://developers.google.com/identity/images/g-logo.png" width="20" class="transition-transform group-hover:scale-110" />
             <span class="text-sm">Google</span>
         </a>

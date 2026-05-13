@@ -4,14 +4,33 @@ namespace App\Services;
 
 use App\Models\Transaction;
 use App\Models\TransactionItem;
-use Illuminate\Support\Facades\Log;        // ← Ganti ini
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;        // ← Ganti ini
 
 class TransactionService extends BaseService
 {
     public function __construct( public Transaction $transaction, public TransactionItem $transaction_items, public JournalService $journalService, public ChartOfAccountService $chartOfAccountService, public AccountService $accountService, public InvoiceService $invoiceService)
     {
+    }
+
+    public function getTransactionData(){
+        $tenantId = Auth::user()->tenant_id;
+        
+        return Cache::remember("tenant_$tenantId:transaction:getTransactionData", now()->addDay(), function () use ($tenantId) {
+            $transactions = Transaction::with('category')->where('tenant_id', $tenantId)->get();
+            $summary = [
+                'total_income'  => $transactions->where('type', 'income')->sum('amountTotal'),
+                'total_expense' => $transactions->where('type', 'expense')->sum('amountTotal'),
+            ];
+            $summary['total_balance'] = $summary['total_income'] - $summary['total_expense'];
+
+            return [
+                'transactions' => $transactions,
+                'summary' => $summary,
+            ];
+        });
     }
     
     public function storeTransactionHeader(array $data){

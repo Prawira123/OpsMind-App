@@ -174,10 +174,7 @@ watch(() => props.status, (val) => {
             btnDesc="Invoice"
         />
 
-        <div v-if="showStatus">
-            <BadgeSuccess :status="props.status"/>
-        </div>
-
+        
         <Deferred data="invoices">
             <template #fallback>
                 <InvoiceSummaryCardsSkeleton />
@@ -185,7 +182,10 @@ watch(() => props.status, (val) => {
                     <InvoiceTableSkeleton />
                 </div>
             </template>
-
+            
+            <div v-if="showStatus">
+                <BadgeSuccess :status="props.status"/>
+            </div>
             <div v-if="invoices">
                 <!-- SUMMARY CARDS -->
                 <InvoiceSummaryCards :invoices="invoices" />

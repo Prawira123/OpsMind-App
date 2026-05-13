@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Scopes\TenantScope;
+use App\Observers\DashboardCacheObserver;
+use App\Observers\TransactionCacheObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use App\Models\Scopes\TenantScope;
-use Illuminate\Support\Facades\Auth;
 
 class Transaction extends Model
 {
@@ -17,6 +19,8 @@ class Transaction extends Model
 
     public static function booted(): void{
         static::addGlobalScope(new TenantScope());
+        static::observe(DashboardCacheObserver::class);
+        static::observe(TransactionCacheObserver::class);
 
         static::creating(function($model){
             if(Auth::check() && Auth::user()->tenant_id){

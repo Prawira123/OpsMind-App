@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { Link, useForm, Deferred } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 import dayjs from 'dayjs'
+import SubscriptionLoading from '@/Components/Subscription/SubscriptionLoading.vue'
 
 const props = defineProps({
     plans: { type: Array, default: () => [] },
@@ -203,19 +204,23 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
 
 <template>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Deferred data="currentSubscription">
+            <template #fallback>
+                <SubscriptionLoading />
+            </template>
 
-        <!-- Back to Dashboard Button -->
-        <div class="max-w-6xl mx-auto px-4 pt-6">
-            <Link
-                href="/dashboard"
-                class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Kembali ke Dashboard
-            </Link>
-        </div>
+            <!-- Back to Dashboard Button -->
+            <div class="max-w-6xl mx-auto px-4 pt-6">
+                <Link
+                    href="/dashboard"
+                    class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Kembali ke Dashboard
+                </Link>
+            </div>
 
         <!-- Current Subscription Info -->
         <div v-if="currentSubscription && currentSubscription.status === 'active'" class="max-w-6xl mx-auto px-4 pt-6">
@@ -572,5 +577,6 @@ const getHighlights = (planName) => planHighlights[planName] ?? []
                 </div>
             </div>
         </div>
+        </Deferred>
     </div>
 </template>

@@ -19,7 +19,7 @@ class ChartOfAccountController extends Controller
 
         return Inertia::render('CoA/index', [
             'status' => session('success'),
-            'chartOfAccounts' => $chartOfAccounts
+            'chartOfAccounts' => Inertia::defer(fn () => $chartOfAccounts)
         ]);
     }
 

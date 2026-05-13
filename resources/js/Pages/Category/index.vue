@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Link, router, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm, Deferred } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Tenant/PageHeader.vue'
@@ -11,6 +11,8 @@ import SearchBar from '@/Components/Partials/SearchBar.vue'
 import OptionSelect from '@/Components/Partials/OptionSelect.vue'
 import ButtonDelete from '@/Components/Partials/ButtonDelete.vue'
 import BadgeSuccess from '@/Components/Partials/BadgeSuccess.vue'
+import CategorySummaryCardsSkeleton from '@/Components/Category/CategorySummaryCardsSkeleton.vue'
+import CategoryTableSkeleton from '@/Components/Category/CategoryTableSkeleton.vue'
 
 // PROPS — dikirim dari AccountController::index()
 const props = defineProps({
@@ -281,275 +283,286 @@ watch(() => props.status, (val) => {
         <PageHeader :href="route('categories.create')" :title="'Kategori'" :desc="'Kelola Kategori kamu'" :btnDesc="'Kategori'"/>
 
         <!-- SUMMARY CARDS -->
-        <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Deferred data="categories">
 
-            <PrimaryCard :titleCard="'Total Kategori'" :mainDesc="summary.total" :subDesc="summary.total" :subTitle="'Kategori'"/>
+            <template #fallback>
+                <CategorySummaryCardsSkeleton/>
+                <div class="rounded-xl bg-white dark:bg-gray-900 border
+                        border-gray-200 dark:border-gray-800 shadow-sm">
+                    <CategoryTableSkeleton />
+                </div>
+            </template>
 
-            <!-- Income -->   
-            <SecondaryCard :main-desc="summary.income" :title-card="'Income'" :sub-title="'Kategori'" :logoPath="'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'" :classLogo="'h-4 w-4 text-emerald-600'"/>
+            <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
 
-            <!-- Expense -->
-            <SecondaryCard :main-desc="summary.expense" :title-card="'Expense'" :sub-title="'Kategori'" :logoPath="'M3 6l9-4 9 4M3 10h18M5 10v8m4-8v8m4-8v8m4-8v8 M19 10v8M3 18h18'" :classLogo="'h-4 w-4 text-blue-600'"/>
+                <PrimaryCard :titleCard="'Total Kategori'" :mainDesc="summary.total" :subDesc="summary.total" :subTitle="'Kategori'"/>
 
-            <SecondaryCard :main-desc="summary.other" :title-card="'Other'" :sub-title="'Kategori'" :logoPath="'M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z'" :classLogo="'h-4 w-4 text-red-600'"/>
+                <!-- Income -->   
+                <SecondaryCard :main-desc="summary.income" :title-card="'Income'" :sub-title="'Kategori'" :logoPath="'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'" :classLogo="'h-4 w-4 text-emerald-600'"/>
 
-        </div>
+                <!-- Expense -->
+                <SecondaryCard :main-desc="summary.expense" :title-card="'Expense'" :sub-title="'Kategori'" :logoPath="'M3 6l9-4 9 4M3 10h18M5 10v8m4-8v8m4-8v8m4-8v8 M19 10v8M3 18h18'" :classLogo="'h-4 w-4 text-blue-600'"/>
 
-        <div class="" v-if="showStatus">
-            <BadgeSuccess :status="props.status"/>
-        </div>
+                <SecondaryCard :main-desc="summary.other" :title-card="'Other'" :sub-title="'Kategori'" :logoPath="'M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z'" :classLogo="'h-4 w-4 text-red-600'"/>
 
-        <!-- TABEL SECTION -->
-        <div class="rounded-xl bg-white dark:bg-gray-900 border
-                    border-gray-200 dark:border-gray-800 shadow-sm">
+            </div>
 
-            <!-- Toolbar -->
-            <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center
-                        sm:justify-between border-b border-gray-200 dark:border-gray-800">
+            <div class="" v-if="showStatus">
+                <BadgeSuccess :status="props.status"/>
+            </div>
 
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <!-- Search -->
-                    <div class="relative">
-                        <LogoCard :class="'absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400'" 
-                        :logo-path="'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0'"/>
-                        <SearchBar v-model="search" :class="'w-full sm:w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 pl-9 pr-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition'" :type="'text'" :placeholder="'Cari Kategori...'"/>
+            <!-- TABEL SECTION -->
+            <div class="rounded-xl bg-white dark:bg-gray-900 border
+                        border-gray-200 dark:border-gray-800 shadow-sm">
+
+                <!-- Toolbar -->
+                <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center
+                            sm:justify-between border-b border-gray-200 dark:border-gray-800">
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <!-- Search -->
+                        <div class="relative">
+                            <LogoCard :class="'absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400'" 
+                            :logo-path="'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0'"/>
+                            <SearchBar v-model="search" :class="'w-full sm:w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 pl-9 pr-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition'" :type="'text'" :placeholder="'Cari Kategori...'"/>
+                        </div>
+
+                        <!-- Filter Tipe -->
+                        <select
+                            v-model="filterType"
+                            class="rounded-lg border border-gray-200 dark:border-gray-700
+                                bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm
+                                text-gray-900 dark:text-white focus:outline-none
+                                focus:ring-2 focus:ring-indigo-500 transition"
+                        >
+                            <OptionSelect v-for="item in optionFilter" :key="item.key" :item="item"/>
+                        </select>
                     </div>
 
-                    <!-- Filter Tipe -->
-                    <select
-                        v-model="filterType"
-                        class="rounded-lg border border-gray-200 dark:border-gray-700
-                               bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm
-                               text-gray-900 dark:text-white focus:outline-none
-                               focus:ring-2 focus:ring-indigo-500 transition"
+                    <!-- Bulk delete button — muncul saat ada yang dipilih -->
+                    <Transition
+                        enter-from-class="opacity-0 scale-95"
+                        enter-active-class="transition duration-150"
+                        leave-to-class="opacity-0 scale-95"
+                        leave-active-class="transition duration-100"
                     >
-                        <OptionSelect v-for="item in optionFilter" :key="item.key" :item="item"/>
-                    </select>
+                        <ButtonDelete v-if="selected.length > 0" @click="confirmBulkDelete" :btn-desc="`Hapus ${selected.length} Data`"/>
+                    </Transition>
                 </div>
 
-                <!-- Bulk delete button — muncul saat ada yang dipilih -->
-                <Transition
-                    enter-from-class="opacity-0 scale-95"
-                    enter-active-class="transition duration-150"
-                    leave-to-class="opacity-0 scale-95"
-                    leave-active-class="transition duration-100"
-                >
-                    <ButtonDelete v-if="selected.length > 0" @click="confirmBulkDelete" :btn-desc="`Hapus ${selected.length} Data`"/>
-                </Transition>
-            </div>
-
-            <!-- Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b border-gray-200 dark:border-gray-800">
-                            <th class="w-10 px-4 py-3">
-                                <input
-                                    type="checkbox"
-                                    :checked="selectAll"
-                                    @change="toggleSelectAll($event.target.checked)"
-                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600
-                                        focus:ring-indigo-500 cursor-pointer"
-                                />
-                            </th>
-                            <th
-                                v-for="col in tableHead"
-                                :key="col.key"
-                                @click="toggleSort(col.key)"
-                                class="px-4 py-3 text-left text-xs font-semibold
-                                    text-gray-500 dark:text-gray-400 uppercase
-                                    tracking-wider cursor-pointer select-none
-                                    hover:text-gray-900 dark:hover:text-white transition-colors"
-                            >
-                                <div class="flex items-center gap-1">
-                                    {{ col.label }}
-                                    <span class="flex flex-col">
-                                        <svg class="h-3 w-3 transition-colors"
-                                            :class="sortKey === col.key && sortDir === 'asc'
-                                                ? 'text-indigo-600' : 'text-gray-300 dark:text-gray-600'"
-                                            viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 4l8 8H4z"/>
-                                        </svg>
-                                        <svg class="h-3 w-3 transition-colors"
-                                            :class="sortKey === col.key && sortDir === 'desc'
-                                                ? 'text-indigo-600' : 'text-gray-300 dark:text-gray-600'"
-                                            viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 20l-8-8h16z"/>
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-
-                            <th class="px-4 py-3 text-right text-xs font-semibold
-                                    text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Aksi
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-
-                        <!-- Empty state -->
-                        <tr v-if="filteredCategories.length === 0">
-                            <td :colspan="tableHead.length + 2" class="px-4 py-16 text-center">
-                                <div class="flex flex-col items-center gap-3">
-                                    <div class="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-800
-                                                flex items-center justify-center">
-                                        <svg class="h-7 w-7 text-gray-400" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                        </svg>
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-800">
+                                <th class="w-10 px-4 py-3">
+                                    <input
+                                        type="checkbox"
+                                        :checked="selectAll"
+                                        @change="toggleSelectAll($event.target.checked)"
+                                        class="h-4 w-4 rounded border-gray-300 text-indigo-600
+                                            focus:ring-indigo-500 cursor-pointer"
+                                    />
+                                </th>
+                                <th
+                                    v-for="col in tableHead"
+                                    :key="col.key"
+                                    @click="toggleSort(col.key)"
+                                    class="px-4 py-3 text-left text-xs font-semibold
+                                        text-gray-500 dark:text-gray-400 uppercase
+                                        tracking-wider cursor-pointer select-none
+                                        hover:text-gray-900 dark:hover:text-white transition-colors"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        {{ col.label }}
+                                        <span class="flex flex-col">
+                                            <svg class="h-3 w-3 transition-colors"
+                                                :class="sortKey === col.key && sortDir === 'asc'
+                                                    ? 'text-indigo-600' : 'text-gray-300 dark:text-gray-600'"
+                                                viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 4l8 8H4z"/>
+                                            </svg>
+                                            <svg class="h-3 w-3 transition-colors"
+                                                :class="sortKey === col.key && sortDir === 'desc'
+                                                    ? 'text-indigo-600' : 'text-gray-300 dark:text-gray-600'"
+                                                viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 20l-8-8h16z"/>
+                                            </svg>
+                                        </span>
                                     </div>
-                                    <div>
+                                </th>
+
+                                <th class="px-4 py-3 text-right text-xs font-semibold
+                                        text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Aksi
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+
+                            <!-- Empty state -->
+                            <tr v-if="filteredCategories.length === 0">
+                                <td :colspan="tableHead.length + 2" class="px-4 py-16 text-center">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div class="h-14 w-14 rounded-full bg-gray-100 dark:bg-gray-800
+                                                    flex items-center justify-center">
+                                            <svg class="h-7 w-7 text-gray-400" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                {{ search ? 'Data tidak ditemukan' : 'Belum ada data' }}
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                {{ search ? 'Coba kata kunci lain' : 'Tambahkan data pertama kamu' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Data rows -->
+                            <tr
+                                v-for="row in filteredCategories"
+                                :key="row.id"
+                                :class="[
+                                    'transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50',
+                                    selected.includes(row.id) && 'bg-indigo-50/50 dark:bg-indigo-900/10',
+                                ]"
+                            >
+                                <!-- Checkbox -->
+                                <td class="px-4 py-3.5">
+                                    <input
+                                        type="checkbox"
+                                        :checked="selected.includes(row.id)"
+                                        @change="toggleSelect(row.id)"
+                                        class="h-4 w-4 rounded border-gray-300 text-indigo-600
+                                            focus:ring-indigo-500 cursor-pointer"
+                                    />
+                                </td>
+
+                                <!-- Dynamic columns -->
+                                <td
+                                    v-for="col in tableHead"
+                                    :key="col.key"
+                                    class="px-4 py-3.5"
+                                >
+                                    <!-- Tipe: nameWithIcon — nama + icon berdasarkan type -->
+                                    <div v-if="getCellType(col.key) === 'nameWithIcon'"
+                                        class="flex items-center gap-3">
+                                        <div :class="[
+                                            'h-9 w-9 rounded-lg flex items-center justify-center shrink-0',
+                                            !row.color && row.type === 'cash'    && 'bg-emerald-100 dark:bg-emerald-900/30',
+                                            !row.color && row.type === 'bank'    && 'bg-blue-100 dark:bg-blue-900/30',
+                                            !row.color && row.type === 'ewallet' && 'bg-violet-100 dark:bg-violet-900/30',
+                                            (!row.color && (!row.type || row.type === 'other')) && 'bg-gray-100 dark:bg-gray-800',
+                                        ]" :style="row.color ? { backgroundColor: row.color + '20' } : {}">
+                                            <svg class="h-4 w-4"
+                                                :class="[
+                                                    !row.color && row.type === 'cash'    ? 'text-emerald-600' :
+                                                    !row.color && row.type === 'bank'    ? 'text-blue-600' :
+                                                    !row.color && row.type === 'ewallet' ? 'text-violet-600' :
+                                                    !row.color ? 'text-gray-500' : ''
+                                                ]"
+                                                :style="row.color ? { color: row.color } : {}"
+                                                fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    :d="getPathIcon(row?.icon)"/>
+                                            </svg>
+                                        </div>
                                         <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ search ? 'Data tidak ditemukan' : 'Belum ada data' }}
-                                        </p>
-                                        <p class="text-xs text-gray-400 mt-1">
-                                            {{ search ? 'Coba kata kunci lain' : 'Tambahkan data pertama kamu' }}
+                                            {{ row[col.key] }}
                                         </p>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
 
-                        <!-- Data rows -->
-                        <tr
-                            v-for="row in filteredCategories"
-                            :key="row.id"
-                            :class="[
-                                'transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50',
-                                selected.includes(row.id) && 'bg-indigo-50/50 dark:bg-indigo-900/10',
-                            ]"
-                        >
-                            <!-- Checkbox -->
-                            <td class="px-4 py-3.5">
-                                <input
-                                    type="checkbox"
-                                    :checked="selected.includes(row.id)"
-                                    @change="toggleSelect(row.id)"
-                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600
-                                        focus:ring-indigo-500 cursor-pointer"
-                                />
-                            </td>
+                                    <!-- Tipe: badge — menggunakan object `type` untuk label & warna -->
+                                    <span
+                                        v-else-if="getCellType(col.key) === 'badge' && col.key === 'type'"
+                                        :class="[
+                                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                            categoryTypes?.[row[col.key]]?.color ?? 'bg-gray-100 text-gray-700'
+                                        ]"
+                                    >
+                                        {{ categoryTypes?.[row[col.key]]?.label ?? row[col.key] }}
+                                    </span>
 
-                            <!-- Dynamic columns -->
-                            <td
-                                v-for="col in tableHead"
-                                :key="col.key"
-                                class="px-4 py-3.5"
-                            >
-                                <!-- Tipe: nameWithIcon — nama + icon berdasarkan type -->
-                                <div v-if="getCellType(col.key) === 'nameWithIcon'"
-                                    class="flex items-center gap-3">
-                                    <div :class="[
-                                        'h-9 w-9 rounded-lg flex items-center justify-center shrink-0',
-                                        !row.color && row.type === 'cash'    && 'bg-emerald-100 dark:bg-emerald-900/30',
-                                        !row.color && row.type === 'bank'    && 'bg-blue-100 dark:bg-blue-900/30',
-                                        !row.color && row.type === 'ewallet' && 'bg-violet-100 dark:bg-violet-900/30',
-                                        (!row.color && (!row.type || row.type === 'other')) && 'bg-gray-100 dark:bg-gray-800',
-                                    ]" :style="row.color ? { backgroundColor: row.color + '20' } : {}">
-                                        <svg class="h-4 w-4"
-                                            :class="[
-                                                !row.color && row.type === 'cash'    ? 'text-emerald-600' :
-                                                !row.color && row.type === 'bank'    ? 'text-blue-600' :
-                                                !row.color && row.type === 'ewallet' ? 'text-violet-600' :
-                                                !row.color ? 'text-gray-500' : ''
-                                            ]"
-                                            :style="row.color ? { color: row.color } : {}"
-                                            fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                :d="getPathIcon(row?.icon)"/>
-                                        </svg>
-                                    </div>
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ row[col.key] }}
+                                    <span
+                                        v-else-if="getCellType(col.key) === 'badge' && col.key === 'is_default'"
+                                        :class="[
+                                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                            statusTypes?.[row[col.key]]?.color ?? 'bg-gray-100 text-gray-700'
+                                        ]"
+                                    >
+                                        {{ statusTypes?.[row[col.key]]?.label ?? row[col.key] }}
+                                    </span>
+
+                                    <!-- Tipe: currency -->
+                                    <p
+                                        v-else-if="getCellType(col.key) === 'currency'"
+                                        class="text-sm font-semibold text-gray-900 dark:text-white"
+                                    >
+                                        {{ formatCurrency?.(row[col.key]) ?? row[col.key] }}
                                     </p>
-                                </div>
 
-                                <!-- Tipe: badge — menggunakan object `type` untuk label & warna -->
-                                <span
-                                    v-else-if="getCellType(col.key) === 'badge' && col.key === 'type'"
-                                    :class="[
-                                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                                        categoryTypes?.[row[col.key]]?.color ?? 'bg-gray-100 text-gray-700'
-                                    ]"
-                                >
-                                    {{ categoryTypes?.[row[col.key]]?.label ?? row[col.key] }}
-                                </span>
-
-                                <span
-                                    v-else-if="getCellType(col.key) === 'badge' && col.key === 'is_default'"
-                                    :class="[
-                                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                                        statusTypes?.[row[col.key]]?.color ?? 'bg-gray-100 text-gray-700'
-                                    ]"
-                                >
-                                    {{ statusTypes?.[row[col.key]]?.label ?? row[col.key] }}
-                                </span>
-
-                                <!-- Tipe: currency -->
-                                <p
-                                    v-else-if="getCellType(col.key) === 'currency'"
-                                    class="text-sm font-semibold text-gray-900 dark:text-white"
-                                >
-                                    {{ formatCurrency?.(row[col.key]) ?? row[col.key] }}
-                                </p>
-
-                                <!-- Tipe: mono — nomor rekening dll -->
-                                <p
-                                    v-else-if="getCellType(col.key) === 'mono'"
-                                    class="text-sm font-mono text-gray-600 dark:text-gray-400"
-                                >
-                                    {{ row[col.key] ?? '—' }}
-                                </p>
-
-                                <!-- Default: text biasa -->
-                                <p v-else class="text-sm text-gray-900 dark:text-white">
-                                    {{ row[col.key] ?? '—' }}
-                                </p>
-                            </td>
-
-                            <!-- Aksi -->
-                            <td class="px-4 py-3.5">
-                                <div class="flex items-center justify-end gap-1">
-                                    <Link
-                                        :href="route('categories.edit', row.id)"
-                                        class="flex h-8 w-8 items-center justify-center rounded-lg
-                                            text-gray-400 hover:text-indigo-600
-                                            hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition"
-                                        title="Edit"
+                                    <!-- Tipe: mono — nomor rekening dll -->
+                                    <p
+                                        v-else-if="getCellType(col.key) === 'mono'"
+                                        class="text-sm font-mono text-gray-600 dark:text-gray-400"
                                     >
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </Link>
+                                        {{ row[col.key] ?? '—' }}
+                                    </p>
 
-                                    <button
-                                        @click="deleteCategory(row.id)"
-                                        class="flex h-8 w-8 items-center justify-center rounded-lg
-                                            text-gray-400 hover:text-red-600
-                                            hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-                                        title="Hapus"
-                                    >
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                    <!-- Default: text biasa -->
+                                    <p v-else class="text-sm text-gray-900 dark:text-white">
+                                        {{ row[col.key] ?? '—' }}
+                                    </p>
+                                </td>
+
+                                <!-- Aksi -->
+                                <td class="px-4 py-3.5">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <Link
+                                            :href="route('categories.edit', row.id)"
+                                            class="flex h-8 w-8 items-center justify-center rounded-lg
+                                                text-gray-400 hover:text-indigo-600
+                                                hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition"
+                                            title="Edit"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </Link>
+
+                                        <button
+                                            @click="deleteCategory(row.id)"
+                                            class="flex h-8 w-8 items-center justify-center rounded-lg
+                                                text-gray-400 hover:text-red-600
+                                                hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                                            title="Hapus"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Footer tabel -->
+                
             </div>
-            <!-- Footer tabel -->
-            
-        </div>
+        </Deferred>
 
     </AppLayout>
 </template>

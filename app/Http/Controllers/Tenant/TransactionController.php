@@ -20,19 +20,17 @@ use Inertia\Inertia;
 class TransactionController extends Controller
 {
 
-    public function index(){
-        $transactions = Transaction::with('category')->get();
+    public function __construct(public TransactionService $transactionService){
+    }
 
-        $summary = [
-            'total_income'  => $transactions->where('type', 'income')->sum('amountTotal'),
-            'total_expense' => $transactions->where('type', 'expense')->sum('amountTotal'),
-        ];
-        $summary['total_balance'] = $summary['total_income'] - $summary['total_expense'];
+    public function index(){
+        
+        $data = $this->transactionService->getTransactionData();
         
         return Inertia::render('Transaction/index', [
             'status'       => session('success'),
-            'transactions' => Inertia::defer(fn () => $transactions),
-            'summary'     => Inertia::defer(fn () => $summary)
+            'transactions' => Inertia::defer(fn () => $data['transactions']),
+            'summary'     => Inertia::defer(fn () => $data['summary'])
         ]);
     }
 

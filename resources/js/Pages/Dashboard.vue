@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { defineAsyncComponent } from 'vue'
 import { usePage, Link, Deferred } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import DashboardSkeleton from '@/Components/Dashboard/DashboardSkeleton.vue'
 
 // =========================================================
 // LAZY LOADED COMPONENTS
@@ -79,23 +80,7 @@ const greeting = computed(() => {
         <Deferred :data="['totalBalance', 'monthlyStats', 'invoicePending', 'recentTransactions', 'topClients', 'incomePerMonth']">
 
             <template #fallback>
-                <!-- Loading skeleton while deferred data loads -->
-                <div class="space-y-5">
-                    <!-- Skeleton for KPI cards -->
-                    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                        <div v-for="i in 4" :key="i" class="h-28 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse"/>
-                    </div>
-                    <!-- Skeleton for chart + summary -->
-                    <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 mb-5">
-                        <div class="lg:col-span-2 h-64 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse"/>
-                        <div class="h-64 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse"/>
-                    </div>
-                    <!-- Skeleton for transactions + clients -->
-                    <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                        <div class="lg:col-span-2 h-80 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse"/>
-                        <div class="h-80 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse"/>
-                    </div>
-                </div>
+                <DashboardSkeleton />
             </template>
 
             <!-- =========================================

@@ -16,7 +16,7 @@ class ClientController extends Controller
         $clients = Client::where('tenant_id', Auth::user()->tenant_id)->get();
         return Inertia::render('Client/index', [
             'status' => session('success'),
-            'clients' => $clients
+            'clients' => Inertia::defer(fn () => $clients)
         ]);
     }
 

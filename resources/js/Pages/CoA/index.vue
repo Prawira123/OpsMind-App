@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Link, router, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm, Deferred } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PageHeader from '@/Components/Tenant/PageHeader.vue'
@@ -9,6 +9,7 @@ import SearchBar from '@/Components/Partials/SearchBar.vue'
 import OptionSelect from '@/Components/Partials/OptionSelect.vue'
 import ButtonDelete from '@/Components/Partials/ButtonDelete.vue'
 import BadgeSuccess from '@/Components/Partials/BadgeSuccess.vue'
+import ChartOfAccontTableSkeleton from '@/Components/ChartOfAccount/ChartOfAccontTableSkeleton.vue'
 
 // PROPS — dikirim dari AccountController::index()
 const props = defineProps({
@@ -313,6 +314,15 @@ watch(() => props.status, (val) => {
         
         <PageHeader :href="route('chart-of-accounts.create')" :title="'Akun'" :desc="'Kelola Akun dalam bisnis kamu'" :btnDesc="'Akun'"/>
 
+        <Deferred data="chartOfAccounts">
+
+            <template #fallback>
+                <div class="rounded-xl bg-white dark:bg-gray-900 border
+                    border-gray-200 dark:border-gray-800 shadow-sm">
+                    <ChartOfAccontTableSkeleton/>
+                </div>
+            </template>
+            
         <div class="" v-if="showStatus">
             <BadgeSuccess :status="props.status"/>
         </div>
@@ -590,6 +600,7 @@ watch(() => props.status, (val) => {
             <!-- Footer tabel -->
             
         </div>
+        </Deferred>
 
     </AppLayout>
 </template>

@@ -13,6 +13,8 @@ const page = usePage()
 // Data dari HandleInertiaRequests shared props
 const user   = computed(() => page.props.auth?.user)
 
+console.log(user.value)
+
 const notifications = computed(() => page.props.notifications ?? [])
 const unreadCount   = computed(() => page.props.unreadCount ?? 0)
 
@@ -265,7 +267,7 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                                 leave-active-class="transition duration-100">
                         <div v-if="sidebarOpen" class="overflow-hidden">
                             <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                {{ user.tenant?.name ?? 'OpsMind' }}
+                                {{ user?.tenant?.name ?? 'OpsMind' }}
                             </p>
                             <p class="text-xs text-gray-400 dark:text-gray-500">OpsMind Suite</p>
                         </div>
@@ -425,12 +427,12 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
             <div class="shrink-0 border-t border-gray-200 dark:border-gray-800 p-3">
                 <div class="flex items-center gap-3 rounded-lg px-2 py-2
                             hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
-                    <div v-if="!user.tenant?.logo" class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500
+                    <div v-if="!user?.tenant?.logo" class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500
                                 to-violet-600 flex items-center justify-center
                                 text-white text-xs font-bold shrink-0">
                         {{ avatarInitial }}
                     </div>
-                    <div v-if="user.tenant?.logo" class="h-7 w-7 rounded-full bg-cover bg-center flex items-center justify-center" :style="{ backgroundImage: `url(${user.tenant?.logo})` }"></div>
+                    <div v-if="user?.tenant?.logo" class="h-7 w-7 rounded-full bg-cover bg-center flex items-center justify-center" :style="{ backgroundImage: `url(${user?.tenant?.logo})` }"></div>
                     <Transition enter-from-class="opacity-0"
                                 enter-active-class="transition duration-200 delay-75"
                                 leave-to-class="opacity-0"
@@ -632,12 +634,12 @@ onUnmounted(() => document.removeEventListener('click', closeAll))
                         <button @click.stop="showUserMenu = !showUserMenu"
                                 class="flex items-center gap-2 rounded-lg px-2 py-1.5
                                        hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                            <div v-if="!user.tenant?.logo" class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500
+                            <div v-if="!user?.tenant?.logo" class="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500
                                         to-violet-600 flex items-center justify-center
                                         text-white text-xs font-bold shrink-0">
                                 {{ avatarInitial }}
                             </div>
-                            <div v-if="user.tenant?.logo" class="h-7 w-7 rounded-full bg-cover bg-center flex items-center justify-center" :style="{ backgroundImage: `url(${user.tenant?.logo})` }">
+                            <div v-if="user?.tenant?.logo" class="h-7 w-7 rounded-full bg-cover bg-center flex items-center justify-center" :style="{ backgroundImage: `url(${user?.tenant?.logo})` }">
                             </div>
                             <span class="hidden sm:block text-sm font-medium text-gray-700
                                          dark:text-gray-300 max-w-28 truncate">

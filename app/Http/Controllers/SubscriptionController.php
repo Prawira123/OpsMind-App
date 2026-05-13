@@ -25,7 +25,7 @@ class SubscriptionController extends Controller
 
         return Inertia::render('Subscription/index', [
             'plans' => $plans,
-            'currentSubscription' => $currentSubscription,
+            'currentSubscription' => Inertia::defer(fn () => $currentSubscription),
     ]);
     }
 

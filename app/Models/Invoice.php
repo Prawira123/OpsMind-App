@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use App\Observers\DashboardCacheObserver;
 
 class Invoice extends Model
 {
@@ -15,6 +16,7 @@ class Invoice extends Model
 
     public static function booted(): void{
         static::addGlobalScope(new TenantScope());
+        static::observe(DashboardCacheObserver::class);
 
         static::creating(function($model){
             if(Auth::check() && Auth::user()->tenant_id){

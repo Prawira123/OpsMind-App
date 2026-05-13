@@ -18,7 +18,7 @@ class AccountController extends Controller
 
         return Inertia::render('Account/index', [
             'status' => session('success'),
-            'accounts' => $accounts
+            'accounts' => Inertia::defer(fn () => $accounts)
         ]);
     }
 
