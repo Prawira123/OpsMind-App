@@ -1,23 +1,19 @@
 <script setup>
 import { computed } from 'vue'
 import { defineAsyncComponent } from 'vue'
-import { usePage, Link, Deferred } from '@inertiajs/vue3'
+import { usePage, Link, Deferred, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import DashboardSkeleton from '@/Components/Dashboard/DashboardSkeleton.vue'
 
 // =========================================================
 // LAZY LOADED COMPONENTS
 // =========================================================
-const KpiCards = defineAsyncComponent(() =>
-    import('@/Components/Dashboard/KpiCards.vue'))
-const IncomeChart = defineAsyncComponent(() =>
-    import('@/Components/Dashboard/IncomeChart.vue'))
-const MonthlySummary = defineAsyncComponent(() =>
-    import('@/Components/Dashboard/MonthlySummary.vue'))
-const RecentTransactions = defineAsyncComponent(() =>
-    import('@/Components/Dashboard/RecentTransactions.vue'))
-const TopClients = defineAsyncComponent(() =>
-    import('@/Components/Dashboard/TopClients.vue'))
+import KpiCards from '@/Components/Dashboard/KpiCards.vue'
+import IncomeChart from '@/Components/Dashboard/IncomeChart.vue'
+import MonthlySummary from '@/Components/Dashboard/MonthlySummary.vue'
+import RecentTransactions from '@/Components/Dashboard/RecentTransactions.vue'
+import TopClients from '@/Components/Dashboard/TopClients.vue'
 
 // =========================================================
 // PROPS
@@ -43,6 +39,18 @@ const greeting = computed(() => {
     if (hour < 17) return 'Selamat Siang'
     return 'Selamat Malam'
 })
+
+const isRefreshing = ref(false)
+
+const refreshDashboard = () => {
+    isRefreshing.value = true
+    router.reload({
+        only: ['totalBalance', 'monthlyStats', 'invoicePending', 'recentTransactions', 'topClients', 'incomePerMonth'],
+        onFinish: () => {
+            isRefreshing.value = false
+        }
+    })
+}
 </script>
 
 <template>
@@ -61,60 +69,58 @@ const greeting = computed(() => {
                     Berikut ringkasan keuangan bisnis kamu hari ini
                 </p>
             </div>
-            <Link :href="route('transactions.create')"
-                class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5
-                       text-sm font-semibold text-white hover:bg-indigo-500
-                       shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                Tambah Transaksi
-            </Link>
+            <div class="flex items-center gap-3">
+                <button @click="refreshDashboard"
+                    :disabled="isRefreshing"
+                    class="inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-800 px-4 py-2.5
+                           text-sm font-semibold text-gray-700 dark:text-gray-200 border border-gray-200
+                           dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700
+                           transition-all shadow-sm disabled:opacity-50">
+                    <svg class="h-4 w-4" :class="{ 'animate-spin': isRefreshing }"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Refresh
+                </button>
+                <Link :href="route('transactions.create')"
+                    class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5
+                           text-sm font-semibold text-white hover:bg-indigo-500
+                           shadow-lg shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Tambah Transaksi
+                </Link>
+            </div>
         </div>
 
         <!-- =========================================
-             DEFERRED DASHBOARD CONTENT
-             Data loaded asynchronously from DashboardController via Inertia::defer()
+             DASHBOARD CONTENT
+             Data loaded instantly from DashboardController (Redis cached)
         ========================================= -->
-        <Deferred :data="['totalBalance', 'monthlyStats', 'invoicePending', 'recentTransactions', 'topClients', 'incomePerMonth']">
-
-            <template #fallback>
-                <DashboardSkeleton />
-            </template>
-
-            <!-- =========================================
-                 ROW 1: KPI CARDS
-            ========================================= -->
         <KpiCards
-                :totalBalance="totalBalance"
-                :monthlyStats="monthlyStats"
-                :invoicePending="invoicePending"
+            :totalBalance="totalBalance"
+            :monthlyStats="monthlyStats"
+            :invoicePending="invoicePending"
+        />
+
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 mt-5 mb-5">
+            <IncomeChart
+                :incomePerMonth="incomePerMonth"
+                class="lg:col-span-2"
             />
+            <MonthlySummary :monthlyStats="monthlyStats" />
+        </div>
 
-            <!-- =========================================
-                 ROW 2: CHART + NET INCOME (Lazy loaded)
-            ========================================= -->
-            <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 mt-5 mb-5">
-                <IncomeChart
-                    :incomePerMonth="incomePerMonth"
-                    class="lg:col-span-2"
-                />
-                <MonthlySummary :monthlyStats="monthlyStats" />
-            </div>
-
-            <!-- =========================================
-                 ROW 3: TRANSACTIONS + TOP CLIENTS (Lazy loaded)
-            ========================================= -->
-            <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                <RecentTransactions
-                    :recentTransactions="recentTransactions"
-                    class="lg:col-span-2"
-                />
-                <TopClients :topClients="topClients" />
-            </div>
-
-        </Deferred>
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+            <RecentTransactions
+                :recentTransactions="recentTransactions"
+                class="lg:col-span-2"
+            />
+            <TopClients :topClients="topClients" />
+        </div>
 
     </AppLayout>
 </template>

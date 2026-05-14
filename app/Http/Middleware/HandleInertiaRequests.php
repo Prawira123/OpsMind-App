@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -32,8 +33,11 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user() ? (function () use ($request) {
-                    $user = $request->user()->load('roles', 'permissions', 'tenant');
+                'user' => (function () use ($request) {
+                    if (!$request->user()) return null;
+                    $user = Cache::remember("user_{$request->user()->id}:profile:getDataProfile", 60*60*24, function() use ($request){
+                        return $request->user()->load('roles', 'permissions', 'tenant');
+                    });
                     return [
                         'id' => $user->id,
                         'name' => $user->name,
@@ -45,14 +49,16 @@ class HandleInertiaRequests extends Middleware
                         'roles' => $user->getRoleNames(),
                         'permissions' => $user->getAllPermissions()->pluck('name'),
                     ];
-                })() : null,
+                }),
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
-            'notifications' => $request->user()
-                ? $request->user()
+            'notifications' => (function() use ($request){
+                if (!$request->user()) return [];
+                return Cache::remember("user_{$request->user()->id}:notification:getDataNotification", 60*60*24, function() use ($request){
+                    $request->user()
                         ->notifications()
                         ->latest()
                         ->take(20)
@@ -65,11 +71,15 @@ class HandleInertiaRequests extends Middleware
                             'type'    => $n->data['type'] ?? null,
                             'time'    => $n->created_at->diffForHumans(),
                             'read_at' => $n->read_at,
-                        ])
-                : [],
-            'unreadCount' => $request->user()
-                ? $request->user()->unreadNotifications()->count()
-                : 0,
+                        ]);
+                });
+            }),
+            'unreadCount' => (function() use ($request){
+                if (!$request->user()) return 0;
+                return Cache::remember("user_{$request->user()->id}:notification:getCountUnreadNotification", 60*60*24, function() use ($request){
+                    return $request->user()->unreadNotifications()->count();
+                });
+            })(),
         ];
     }
 }

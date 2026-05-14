@@ -13,6 +13,7 @@ use App\Services\InvoiceService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -23,9 +24,15 @@ class InvoiceController extends Controller
     {}
 
     public function index()
-    {
+    {   
+        $tenantId = Auth::user()->tenant_id;
+
+        $invoices = Cache::remember("tenant_{$tenantId}:invoice:getInvoiceData", now()->addDay(), function () {
+            return Invoice::with('client')->latest()->get()->toArray();
+        });
+
         return Inertia::render('Invoice/index', [
-            'invoices' => Inertia::defer(fn () => Invoice::with('client')->latest()->get()),
+            'invoices' => Inertia::defer(fn () => $invoices),
             'status' => session('status'),
         ]);
     }
@@ -53,8 +60,12 @@ class InvoiceController extends Controller
 
     public function show($id)
     {
+        $invoice = Cache::remember("invoice_{$id}:detail", now()->addDay(), function () use ($id) {
+            return Invoice::with('client', 'items')->findOrFail($id);
+        });
+
         return Inertia::render('Invoice/show', [
-            'invoice' => Inertia::defer(fn () =>  Invoice::with('client', 'items')->findOrFail($id)),
+            'invoice' => Inertia::defer(fn () =>  $invoice),
         ]);
     }
 

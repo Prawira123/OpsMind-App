@@ -1,59 +1,105 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 OpsMind Suite
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**OpsMind Suite** is a modern, high-performance web application designed for comprehensive financial management and business operations. Built with a focus on speed, scalability, and multi-tenant isolation, it provides a seamless experience for managing transactions, invoices, and accounting tasks.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Key Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **🏛️ Multi-Tenancy**: Complete data isolation using a robust `TenantScope` system.
+- **💰 Financial Management**: Full accounting suite with Chart of Accounts (CoA) and Journal Entries.
+- **📄 Invoicing System**: Professional invoice generation, tracking, and management.
+- **📊 Real-time Dashboard**: Interactive KPI cards, monthly revenue charts, and transaction summaries.
+- **🤖 AI Integration**: Built-in AI chatbot support for business assistance.
+- **🔒 Security**: OAuth 2.0 (GitHub) integration, OTP verification, and role-based access control.
+- **📱 Responsive UI**: Beautifully crafted with Tailwind CSS and Vue 3 (Inertia.js).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🛠️ Technology Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+| Role | Technology |
+| :--- | :--- |
+| **Backend** | [Laravel 11+](https://laravel.com/) |
+| **Frontend** | [Vue.js 3](https://vuejs.org/) (Composition API) |
+| **SPA Framework** | [Inertia.js](https://inertiajs.com/) |
+| **Database** | MySQL / PostgreSQL |
+| **Caching** | [Redis](https://redis.io/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Charts** | [Chart.js](https://www.chartjs.org/) |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## ⚡ Performance Optimizations
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+OpsMind is engineered for speed. Recent optimizations include:
 
-### Premium Partners
+### 1. Redis Caching Strategy
+We use a **Tenant-Aware caching** mechanism. Dashboard metrics, user profiles, and notifications are stored in Redis with per-tenant keys (`tenant_{id}:...`).
+- **Auto-Invalidation**: Using Laravel Observers, the cache is automatically cleared when relevant models (`Transaction`, `Invoice`, `Account`) are modified.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 2. Instant Load Architecture
+By moving heavy computations to Redis and removing asynchronous `defer` dependencies, we achieved an **instant initial render**. Essential dashboard data is served directly from the cache during the initial request.
 
-## Contributing
+### 3. Progressive Loading
+For heavier sections like the Subscription Plan, we utilize **Inertia.js Deferred Props** combined with a custom **Glassmorphism Skeleton UI** to ensure the app feels responsive even during cold starts.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 📦 Installation
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+To get started with OpsMind locally, follow these steps:
 
-## Security Vulnerabilities
+### Prerequisites
+- PHP 8.2+
+- Composer
+- Node.js & NPM
+- Redis Server
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Setup
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Prawira123/OpsMind-App.git
+   cd OpsMind-App
+   ```
 
-## License
+2. **Install Dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Database & Redis**
+   Configure your database and Redis credentials in `.env`.
+
+5. **Run Migrations & Seeds**
+   ```bash
+   php artisan migrate --seed
+   ```
+
+6. **Start the Application**
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to submit Pull Requests or report issues via the GitHub Issues tab.
+
+---
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+<p align="center">Made with ❤️ for modern business operations.</p>

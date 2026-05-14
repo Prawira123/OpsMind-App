@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\SocialAccount;
 use App\Models\Tenant;
+use App\Observers\HandleInertiaRequestCacheObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,6 +19,10 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, HasRoles, LogsActivity;
 
+    protected static function booted(): void
+    {
+        static::observe(HandleInertiaRequestCacheObserver::class);
+    }
     /**
      * The attributes that are mass assignable.
      *
