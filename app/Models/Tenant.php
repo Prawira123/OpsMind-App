@@ -88,4 +88,9 @@ class Tenant extends BaseTenant
     {
         return $this->hasMany(Report::class);
     }
+
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class);
+    }
 }

@@ -23,7 +23,7 @@ class ProfileController extends Controller
     public function index(){
 
         $user = Auth::user();
-        $tenant = Tenant::where('user_id', $user->id)->first();
+        $tenant = $user->tenant;
 
         return Inertia::render('Profile/index', [
             'status' => session('success'),
@@ -86,9 +86,10 @@ class ProfileController extends Controller
 
     public function update2FA(TwoFAUpdateRequest $request, ProfileService $service){
 
-        $tenant = Tenant::where('user_id', Auth::user()->id)->first();
+        $user = Auth::user();
+        $tenant_id = $user->tenant_id;
 
-        if($tenant->id !== Auth::user()->tenant_id){
+        if(!$tenant_id){
             abort(403, 'Kamu tidak Punya Akses');
         }
 

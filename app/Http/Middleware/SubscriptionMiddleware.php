@@ -19,7 +19,7 @@ class SubscriptionMiddleware
     public function handle(Request $request, Closure $next): Response
     {   
         $user = Auth::user();
-        $tenant = Tenant::where('user_id', $user->id)->first();
+        $tenant = $user->tenant;
 
         if(!$tenant->subs_id){
             return redirect()->route('subs.index');

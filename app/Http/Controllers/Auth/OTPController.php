@@ -14,14 +14,19 @@ use Inertia\Inertia;
 
 class OTPController extends Controller
 {
-    public function create(string $type){
+    public function create(string $type, OTPService $service){
 
         if($type === 'forgot_password'){
             $email = session('forgot_password_email');
         }elseif($type === 'two_factor'){
             $email = session('two_factor_email');
         }else{
-            $email = Auth::user()->email;                                                                                
+            $user = Auth::user();
+            $email = $user->email;
+
+            if ($type === 'email_verification' && !$user->email_verified_at) {
+                $service->generate($user, 'email_verification');
+            }
         }
 
         return Inertia::render('Auth/Otp', [

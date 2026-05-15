@@ -13,6 +13,7 @@ use App\Http\Controllers\Tenant\InvoiceController;
 use App\Http\Controllers\Tenant\LaporanController;
 use App\Http\Controllers\Tenant\NotificationController;
 use App\Http\Controllers\Tenant\TransactionController;
+use App\Http\Controllers\TenantInvitationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,6 +28,9 @@ Route::get('/', function () {
 });
 
 Route::get('download-invoice/{token}', [InvoiceController::class, 'publicDownload'])->name('invoices.public-download');
+
+//Invitation Accepted
+Route::get('invitations/{id}/accept', [TenantInvitationController::class, 'acceptInvitation'])->name('invitations.accept');
 
 // Route::get('/test-log', function () {
 //     Log::info('test log berhasil');
@@ -111,6 +115,10 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
         Route::get('arus-kas', [LaporanController::class, 'getArusKas'])->name('reports.cashflow');
         Route::get('buku-besar', [LaporanController::class, 'getBukuBesar'])->name('reports.ledger');
     });
+
+    //Team Management & Invitations
+    Route::get('team', [TenantInvitationController::class, 'index'])->name('team.index');
+    Route::resource('invitations', TenantInvitationController::class)->only(['store', 'destroy']);
 
     //AI Route
     Route::get('ai', [AIController::class, 'index'])->name('ai.index');

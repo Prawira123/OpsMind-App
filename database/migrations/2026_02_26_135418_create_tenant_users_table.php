@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('role');
             $table->string('token');
             $table->enum('status', ['pending', 'accepted', 'expired'])->default('pending');
-            $table->date('expires_at');
+            $table->date('expires_at')->nullable();
             $table->date('accepted_at')->nullable();
             $table->timestamps();
             $table->index('tenant_id');

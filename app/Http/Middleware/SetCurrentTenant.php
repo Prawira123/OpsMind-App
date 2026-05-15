@@ -19,7 +19,7 @@ class SetCurrentTenant
     {
         $user = Auth::user();
 
-        if($user && $user->tenant_id){
+        if($user && $user->tenant_id && $user->tenant){
             $user->tenant->makeCurrent();
         }
 

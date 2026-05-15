@@ -23,7 +23,7 @@ class TenantInvitation extends Model
     }
 
     protected $fillable = [
-        'tenant_id', 'invited_by', 'email', 'role', 'token', 'status', 'expires_at', 'accepted_at'
+        'tenant_id', 'invited_by', 'email', 'role', 'token', 'status', 'expires_at', 'accepted_at', 'user_id'
     ];
 
     protected $casts = [
@@ -34,15 +34,10 @@ class TenantInvitation extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-        ->logOnly(['tenant_id', 'invited_by', 'email', 'role', 'token', 'status', 'expires_at', 'accepted_at'])
+        ->logOnly(['tenant_id', 'invited_by', 'email', 'role', 'token', 'status', 'expires_at', 'accepted_at', 'user_id'])
         ->logOnlyDirty()
         ->submitEmptyLogs()
-        ->setDescriptionForEvent(fn(string $eventName) => match($eventName){
-            'created' => 'Invitation baru telah didaftarkan',
-            'updated' => 'Invitation telah diperbarui',
-            'deleted' => 'Invitation telah dihapus',
-            default => "invitation {$eventName}",
-        });
+        ->setDescriptionForEvent(fn(string $eventName) => "invitation {$eventName}");
     }
 
     public function tenant(){
@@ -52,4 +47,8 @@ class TenantInvitation extends Model
     public function invitedBy(){
         return $this->belongsTo(User::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }   
 }

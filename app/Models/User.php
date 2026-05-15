@@ -72,12 +72,7 @@ class User extends Authenticatable
             ->logOnly(['name', 'email', 'is_active', 'two_factor_enabled'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
-                'created' => 'User baru telah didaftarkan',
-                'updated' => 'User telah diperbarui',
-                'deleted' => 'User telah dihapus',
-                default => "user {$eventName}",
-            });
+            ->setDescriptionForEvent(fn(string $eventName) => "user {$eventName}");
     }
 
     public function is_verified(): bool
@@ -88,6 +83,19 @@ class User extends Authenticatable
     public function isOwner()
     {
         return $this->hasRole('owner');
+    }
+    
+    public function isManager()
+    {
+        return $this->hasRole('manager');
+    }
+
+    public function isAccountant(){
+        return $this->hasRole('accountant');
+    }
+
+    public function isStaff(){
+        return $this->hasRole('staff');
     }
 
     public function Otp_codes()
@@ -113,6 +121,10 @@ class User extends Authenticatable
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function tenant_invitation(){
+        return $this->hasOne(TenantInvitation::class);
     }
 
 }
