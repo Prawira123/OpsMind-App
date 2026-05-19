@@ -57,28 +57,24 @@ class HandleInertiaRequests extends Middleware
             ],
             'notifications' => (function() use ($request){
                 if (!$request->user()) return [];
-                return Cache::remember("user_{$request->user()->id}:notification:getDataNotification", 60*60*24, function() use ($request){
-                    $request->user()
-                        ->notifications()
-                        ->latest()
-                        ->take(20)
-                        ->get()
-                        ->map(fn($n) => [
-                            'id'      => $n->id,
-                            'title'   => $n->data['title'] ?? 'Notifikasi',
-                            'message' => $n->data['message'] ?? '',
-                            'url'     => $n->data['url'] ?? null,
-                            'type'    => $n->data['type'] ?? null,
-                            'time'    => $n->created_at->diffForHumans(),
-                            'read_at' => $n->read_at,
-                        ]);
-                });
+                return $request->user()
+                    ->notifications()
+                    ->latest()
+                    ->take(20)
+                    ->get()
+                    ->map(fn($n) => [
+                        'id'      => $n->id,
+                        'title'   => $n->data['title'] ?? 'Notifikasi',
+                        'message' => $n->data['message'] ?? '',
+                        'url'     => $n->data['url'] ?? null,
+                        'type'    => $n->data['type'] ?? null,
+                        'time'    => $n->created_at->diffForHumans(),
+                        'read_at' => $n->read_at,
+                    ]);
             }),
             'unreadCount' => (function() use ($request){
                 if (!$request->user()) return 0;
-                return Cache::remember("user_{$request->user()->id}:notification:getCountUnreadNotification", 60*60*24, function() use ($request){
-                    return $request->user()->unreadNotifications()->count();
-                });
+                return $request->user()->unreadNotifications()->count();
             })(),
         ];
     }

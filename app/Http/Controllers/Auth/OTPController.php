@@ -63,7 +63,8 @@ class OTPController extends Controller
 
         if ($type === 'email_verification') {
             $user->update([
-                'email_verified_at' => now()
+                'email_verified_at' => now(),
+                'is_online' => true
             ]);
             return redirect()->route('dashboard')
                          ->with('success', 'Email berhasil diverifikasi!');
@@ -92,8 +93,14 @@ class OTPController extends Controller
         }
 
         if($type == 'two_factor'){
+            
             $user = User::find(session('two_factor_user_id'));
             Auth::login($user);
+
+            $user->update([
+                'is_online' => true,
+            ]);
+
             session()->forget('two_factor_user_id');
             return redirect()->route('dashboard')
                         ->with('success', 'Login berhasil!');  

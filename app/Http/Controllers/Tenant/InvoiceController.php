@@ -39,8 +39,13 @@ class InvoiceController extends Controller
 
     public function create()
     {
+        $tenantId = Auth::user()->tenant_id;
+        $clients = Cache::remember("tenant_{$tenantId}:client:all", now()->addDay(), function () {
+            return Client::all();
+        });
+
         return Inertia::render('Invoice/create', [
-            'clients' => Client::all(),
+            'clients' => $clients,
             'transactions' => Transaction::with('transaction_items')->latest()->get(),
         ]);
     }
@@ -71,9 +76,14 @@ class InvoiceController extends Controller
 
     public function edit($id)
     {
+        $tenantId = Auth::user()->tenant_id;
+        $clients = Cache::remember("tenant_{$tenantId}:client:all", now()->addDay(), function () {
+            return Client::all();
+        });
+
         return Inertia::render('Invoice/edit', [
             'invoice' => Invoice::with('client', 'items')->findOrFail($id),
-            'clients' => Client::all(),
+            'clients' => $clients,
             'transactions' => Transaction::with('transaction_items')->latest()->get(),
         ]);
     }

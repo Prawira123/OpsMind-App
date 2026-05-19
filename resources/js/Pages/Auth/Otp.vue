@@ -138,7 +138,7 @@ const resend = () => {
                     placeholder="123456"
                     autofocus
                     :class="[
-                        'w-full rounded-xl border-2 px-4 py-4 text-center text-2xl font-bold tracking-widest',
+                        'w-full rounded-xl border-2 px-4 py-4 text-center text-2xl text-white font-bold tracking-widest',
                         'transition-all duration-200 focus:outline-none',
                         form.errors.code
                             ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-200'
@@ -151,7 +151,7 @@ const resend = () => {
                     </svg>
                     {{ form.errors.code }}
                 </div>
-                <p class="text-xs text-gray-400 dark:text-gray-500">Kode berlaku selama 10 menit</p>
+                <p class="text-xs text-gray-400 dark:text-white">Kode berlaku selama 10 menit</p>
             </div>
 
             <!-- Verify Button -->
@@ -162,16 +162,16 @@ const resend = () => {
                     class="w-full justify-center py-3 rounded-xl text-base font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 border-0 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                     <span v-if="form.processing" class="flex items-center justify-center space-x-2">
-                        <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 animate-spin text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        <span>Memverifikasi...</span>
+                        <span class="text-white">Memverifikasi...</span>
                     </span>
                     <span v-else class="flex items-center justify-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        <span>Verifikasi</span>
+                        <span class="text-white">Verifikasi</span>
                     </span>
                 </button>
             </div>

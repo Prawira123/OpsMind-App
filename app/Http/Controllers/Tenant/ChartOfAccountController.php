@@ -9,13 +9,17 @@ use App\Models\ChartOfAccount;
 use App\Services\ChartOfAccountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ChartOfAccountController extends Controller
 {
     public function index(){
-        $chartOfAccounts = ChartOfAccount::with('accountType')->get();
+        $tenantId = Auth::user()->tenant_id;
+        $chartOfAccounts = Cache::remember("tenant_{$tenantId}:chart_of_account:all_with_account_type", now()->addDay(), function () {
+            return ChartOfAccount::with('accountType')->get();
+        });
 
         return Inertia::render('CoA/index', [
             'status' => session('success'),
@@ -24,8 +28,10 @@ class ChartOfAccountController extends Controller
     }
 
     public function create(){
-
-        $chartOfAccounts = ChartOfAccount::with('accountType')->get();
+        $tenantId = Auth::user()->tenant_id;
+        $chartOfAccounts = Cache::remember("tenant_{$tenantId}:chart_of_account:all_with_account_type", now()->addDay(), function () {
+            return ChartOfAccount::with('accountType')->get();
+        });
 
         return Inertia::render('CoA/create', compact( 'chartOfAccounts'));
     }
@@ -46,7 +52,10 @@ class ChartOfAccountController extends Controller
             abort(403, 'Kamu tidak Punya Akses');
         }
 
-        $chartOfAccounts = ChartOfAccount::all();
+        $tenantId = Auth::user()->tenant_id;
+        $chartOfAccounts = Cache::remember("tenant_{$tenantId}:chart_of_account:all", now()->addDay(), function () {
+            return ChartOfAccount::all();
+        });
 
         return Inertia::render('CoA/edit', compact('chartOfAccount', 'chartOfAccounts'));
     }

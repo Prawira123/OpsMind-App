@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\SocialAccount;
 use App\Models\Tenant;
+use App\Observers\DashboardCacheObserver;
 use App\Observers\HandleInertiaRequestCacheObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,6 +23,7 @@ class User extends Authenticatable
     protected static function booted(): void
     {
         static::observe(HandleInertiaRequestCacheObserver::class);
+        static::observe(DashboardCacheObserver::class);
     }
     /**
      * The attributes that are mass assignable.
@@ -38,6 +40,8 @@ class User extends Authenticatable
         'two_factor_secret',   // kunci 2FA (dienkripsi)
         'github_id',
         'tenant_id',
+        'is_online',
+        'last_seen',
     ];
 
     /**
@@ -63,6 +67,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_enabled' => 'boolean',
             'is_active' => 'boolean',
+            'is_online' => 'boolean',
+            'last_seen' => 'datetime',
         ];
     }
 

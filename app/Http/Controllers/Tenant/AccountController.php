@@ -8,13 +8,17 @@ use App\Http\Requests\Account\AccountUpdateRequest;
 use App\Models\Account;
 use App\Services\AccountService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 
 class AccountController extends Controller
 {
     public function index(){
-        $accounts = Account::all();
+        $tenantId = Auth::user()->tenant_id;
+        $accounts = Cache::remember("tenant_{$tenantId}:account:all", now()->addDay(), function () {
+            return Account::all();
+        });
 
         return Inertia::render('Account/index', [
             'status' => session('success'),

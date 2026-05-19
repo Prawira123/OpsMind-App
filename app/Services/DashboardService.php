@@ -5,8 +5,9 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\Invoice;
 use App\Models\Transaction;
-use Illuminate\Support\Facades\Cache;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardService extends BaseService
 {
@@ -15,10 +16,8 @@ class DashboardService extends BaseService
         //
     }
 
-    public function getIncomeTotal(){
-        $tenantId = Auth::user()->tenant_id;
-        return Cache::remember("tenant_{$tenantId}:dashboard:getIncomeTotal", now()->addDay(), function () {
-            $data = Transaction::where('type', 'income')
+    private function getIncomeTotal(){
+        $data = Transaction::where('type', 'income')
             ->selectRaw('
                 YEAR(date) as year,
                 MONTH(date) as month,
@@ -36,10 +35,20 @@ class DashboardService extends BaseService
                 $labels[] = date('F Y', mktime(0, 0, 0, $item->month, 1, $item->year));
                 $totals[] = (float) $item->total_income;
             }
-
+             
             return [
                 'labels' => $labels,
                 'totals' => $totals
+            ];
+    }
+
+    public function getDataFinancial(){
+        $tenantId = Auth::user()->tenant_id;
+        return Cache::remember("tenant_{$tenantId}:dashboard:getDataFinancial", now()->addDay(), function () {
+            return [
+                'monthlyStats' => $this->getTransactionThisMonth(),
+                'incomePerMonth' => $this->getIncomeTotal(),
+                'totalBalance' => $this->getTotalBalance(),
             ];
         });
     }
@@ -55,9 +64,7 @@ class DashboardService extends BaseService
         });
     }
 
-    public function getTransactionThisMonth(){
-        $tenantId = Auth::user()->tenant_id;
-        return Cache::remember("tenant_{$tenantId}:dashboard:getTransactionThisMonth", now()->addDay(), function () {
+    private function getTransactionThisMonth(){
             $transaction = Transaction::whereMonth('date', now()->month)
             ->whereYear('date', now()->year)
             ->get();
@@ -69,7 +76,6 @@ class DashboardService extends BaseService
                 'income' => $income,
                 'expense' => $expense
             ];
-        });
     }
 
     public function getInvoicePending(){
@@ -82,12 +88,9 @@ class DashboardService extends BaseService
         });
     }
 
-    public function getTotalBalance(){
-        $tenantId = Auth::user()->tenant_id;
-        return Cache::remember("tenant_{$tenantId}:dashboard:getTotalBalance", now()->addDay(), function () {
-            // Ensure we sum balance from active accounts for the current tenant
-            return Account::where('is_active', true)->sum('balance') ?: 0;
-        });
+    private function getTotalBalance(){
+        // Ensure we sum balance from active accounts for the current tenant
+        return Account::where('is_active', true)->sum('balance') ?: 0;
     }
 
     public function getTopClient(){
@@ -101,6 +104,16 @@ class DashboardService extends BaseService
             ->get();
 
             return $transactions;
+        });
+    }
+
+    public function getDataUserOnline($tenantId = null){
+        $tenantId = $tenantId ?: Auth::user()->tenant_id;
+        
+        return Cache::remember("tenant_{$tenantId}:dashboard:getUserOnline", now()->addDay(), function () use ($tenantId) {
+            return User::where('tenant_id', $tenantId)
+                ->where('is_online', true)
+                ->count();
         });
     }
 }

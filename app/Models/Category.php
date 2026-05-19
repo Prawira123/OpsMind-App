@@ -5,11 +5,13 @@ namespace App\Models;
 use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use App\Observers\MasterDataCacheObserver;
 
 class Category extends Model
 {
     public static function booted(): void{
         static::addGlobalScope(new TenantScope());
+        static::observe(MasterDataCacheObserver::class);
 
         static::creating(function($model){
             if(Auth::check() && Auth::user()->tenant_id){

@@ -8,12 +8,17 @@ use App\Http\Requests\Client\ClientUpdateRequest;
 use App\Models\Client;
 use App\Services\ClientService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class ClientController extends Controller
 {
     public function index(){
-        $clients = Client::where('tenant_id', Auth::user()->tenant_id)->get();
+        $tenantId = Auth::user()->tenant_id;
+        $clients = Cache::remember("tenant_{$tenantId}:client:all", now()->addDay(), function () {
+            return Client::all();
+        });
+
         return Inertia::render('Client/index', [
             'status' => session('success'),
             'clients' => Inertia::defer(fn () => $clients)

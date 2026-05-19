@@ -12,8 +12,6 @@ class HandleInertiaRequestCacheObserver
             $userId = Auth::user()->id; 
             $keys = [
                 "user_{$userId}:profile:getDataProfile",
-                "user_{$userId}:notification:getDataNotification",
-                "user_{$userId}:notification:getCountUnreadNotification"
             ];
 
             foreach($keys as $key){

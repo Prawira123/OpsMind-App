@@ -13,6 +13,7 @@ use App\Models\TransactionItem;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -35,10 +36,20 @@ class TransactionController extends Controller
     }
 
     public function create(){
-        $categories = Category::with('tenant')->get();
-        $accounts = ChartOfAccount::with('tenant')->get();
-        $clients = Client::with('tenant')->get();
-        $rekenings = Account::with('tenant')->get();
+        $tenantId = Auth::user()->tenant_id;
+
+        $categories = Cache::remember("tenant_{$tenantId}:category:all_with_tenant", now()->addDay(), function () {
+            return Category::with('tenant')->get();
+        });
+        $accounts = Cache::remember("tenant_{$tenantId}:chart_of_account:all_with_tenant", now()->addDay(), function () {
+            return ChartOfAccount::with('tenant')->get();
+        });
+        $clients = Cache::remember("tenant_{$tenantId}:client:all_with_tenant", now()->addDay(), function () {
+            return Client::with('tenant')->get();
+        });
+        $rekenings = Cache::remember("tenant_{$tenantId}:account:all_with_tenant", now()->addDay(), function () {
+            return Account::with('tenant')->get();
+        });
 
         return Inertia::render('Transaction/create', [ 
             'categories' => $categories,
@@ -75,12 +86,23 @@ class TransactionController extends Controller
     }
 
     public function edit($id){
+        $tenantId = Auth::user()->tenant_id;
         $transaction = Transaction::with('category', 'client')->find($id);
-        $category = Category::with('tenant')->get();
+        
+        $category = Cache::remember("tenant_{$tenantId}:category:all_with_tenant", now()->addDay(), function () {
+            return Category::with('tenant')->get();
+        });
         $transactionItems = TransactionItem::where('transaction_id', $transaction->id)->get();
-        $clients = Client::with('tenant')->get();
-        $accounts = ChartOfAccount::with('tenant')->get();
-        $rekenings = Account::with('tenant')->get();
+        
+        $clients = Cache::remember("tenant_{$tenantId}:client:all_with_tenant", now()->addDay(), function () {
+            return Client::with('tenant')->get();
+        });
+        $accounts = Cache::remember("tenant_{$tenantId}:chart_of_account:all_with_tenant", now()->addDay(), function () {
+            return ChartOfAccount::with('tenant')->get();
+        });
+        $rekenings = Cache::remember("tenant_{$tenantId}:account:all_with_tenant", now()->addDay(), function () {
+            return Account::with('tenant')->get();
+        });
 
 
         Log::info("langkah 1", ['id' => $id, 'transaction' => $transaction]);

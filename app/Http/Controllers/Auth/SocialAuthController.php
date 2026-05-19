@@ -33,6 +33,11 @@ class SocialAuthController extends Controller
         $user = $service->handleSocialLogin($provider);
 
         Auth::login($user);
+        
+        $user->update([
+            'is_online' => true,
+        ]);
+
 
         return redirect(route('dashboard', absolute: false));
     }

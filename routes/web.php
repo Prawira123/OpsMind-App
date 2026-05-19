@@ -58,6 +58,11 @@ Route::post('/midtrans/notification', [MidtransController::class, 'notification'
 
 Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'SubscriptionActive'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data-financial', [DashboardController::class, 'getDataFinancial'])->name('dashboard.data-financial');
+    Route::get('/dashboard/invoice-pending', [DashboardController::class, 'getInvoicePending'])->name('dashboard.invoice-pending');
+    Route::get('/dashboard/recent-transaction', [DashboardController::class, 'getRecentTransaction'])->name('dashboard.recent-transaction');
+    Route::get('/dashboard/top-client', [DashboardController::class, 'getTopClient'])->name('dashboard.top-client');
+    Route::get('/dashboard/user-online', [DashboardController::class, 'getUserOnline'])->name('dashboard.user-online');
 
     //Account Route
     Route::delete('accounts/bulk-destroy', [AccountController::class, 'bulkDestroy'])

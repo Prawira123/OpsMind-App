@@ -67,7 +67,7 @@ const getStatusColor = (status) => {
     <AppLayout title="My Team">
         <Head title="My Team" />
 
-        <div class="max-w-7xl mx-auto py-6">
+        <div class="max-w-full mx-auto py-6">
             <!-- Header Section -->
             <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
@@ -96,6 +96,8 @@ const getStatusColor = (status) => {
                                 <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Anggota</th>
                                 <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Role</th>
                                 <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status Online</th>
+                                <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Last Seen</th>
                                 <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -122,6 +124,22 @@ const getStatusColor = (status) => {
                                     <span :class="[getStatusColor(member.status), 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium']">
                                         {{ member.status === 'active' ? 'Aktif' : 'Menunggu' }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-5">
+                                    <span v-if="member.is_online" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50">
+                                        <span class="relative flex h-1.5 w-1.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                        </span>
+                                        Online
+                                    </span>
+                                    <span v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                                        Offline
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ member.last_seen }}
                                 </td>
                                 <td class="px-6 py-5 text-right">
                                     <button @click="deleteMember(member.id)" class="text-gray-400 hover:text-red-500 transition-colors p-2">

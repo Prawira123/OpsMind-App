@@ -9,6 +9,7 @@ use App\Models\Scopes\TenantScope;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use App\Observers\MasterDataCacheObserver;
 
 class Client extends Model
 {
@@ -16,6 +17,7 @@ class Client extends Model
 
     public static function booted(): void{
         static::addGlobalScope(new TenantScope());
+        static::observe(MasterDataCacheObserver::class);
 
         static::creating(function($model){
             if(Auth::check() && Auth::user()->tenant_id){

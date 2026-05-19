@@ -19,7 +19,7 @@ class TransactionService extends BaseService
         $tenantId = Auth::user()->tenant_id;
 
         return Cache::remember("tenant_$tenantId:transaction:getTransactionData", now()->addDay(), function () use ($tenantId) {
-            $transactions = Transaction::with('category')->where('tenant_id', $tenantId)->get()->toArray();
+            $transactions = Transaction::with('category')->where('tenant_id', $tenantId)->get();
             $summary = [
                 'total_income'  => $transactions->where('type', 'income')->sum('amountTotal'),
                 'total_expense' => $transactions->where('type', 'expense')->sum('amountTotal'),
@@ -27,7 +27,7 @@ class TransactionService extends BaseService
             $summary['total_balance'] = $summary['total_income'] - $summary['total_expense'];
 
             return [
-                'transactions' => $transactions,
+                'transactions' => $transactions->toArray(),
                 'summary' => $summary,
             ];
         });

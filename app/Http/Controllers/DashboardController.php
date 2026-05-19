@@ -12,12 +12,41 @@ class DashboardController extends Controller
 
     public function index(){
         return Inertia::render('Dashboard', [
-            'totalBalance'       => $this->dashboardService->getTotalBalance(),
-            'monthlyStats'       => $this->dashboardService->getTransactionThisMonth(),
+            'financialData'      => $this->dashboardService->getDataFinancial(),
             'invoicePending'     => $this->dashboardService->getInvoicePending(),
             'recentTransactions' => $this->dashboardService->getRecentTransaction(),
             'topClients'         => $this->dashboardService->getTopClient(),
-            'incomePerMonth'     => $this->dashboardService->getIncomeTotal(),
+            'userOnline'         => $this->dashboardService->getDataUserOnline(),
+        ]);
+    }
+
+    public function getDataFinancial(){
+        return response()->json([
+            'dataFinancial' => $this->dashboardService->getDataFinancial(), 
+        ]);
+    }
+
+    public function getInvoicePending(){
+        return response()->json([
+            'invoicePending' => $this->dashboardService->getInvoicePending(),
+        ]);
+    }
+
+    public function getRecentTransaction(){
+        return response()->json([
+            'recentTransactions' => $this->dashboardService->getRecentTransaction(),
+        ]);
+    }
+
+    public function getTopClient(){
+        return response()->json([
+            'topClients' => $this->dashboardService->getTopClient(),
+        ]);
+    }
+
+    public function getUserOnline(){
+        return response()->json([
+            'userOnline' => $this->dashboardService->getDataUserOnline(),
         ]);
     }
 }

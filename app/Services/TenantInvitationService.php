@@ -33,6 +33,8 @@ class TenantInvitationService extends BaseService
                 'avatar' => $user->profile_photo_url ?? null,
                 'status' => 'active',
                 'joined_at' => $user->created_at->diffForHumans(),
+                'is_online' => (bool) $user->is_online,
+                'last_seen' => $user->is_online ? '-' : ($user->last_seen ? $user->last_seen->diffForHumans() : '-'),
             ]);
 
         $invitations = TenantInvitation::where('tenant_id', $tenantId)
@@ -45,6 +47,8 @@ class TenantInvitationService extends BaseService
                 'role' => $invitation->role,
                 'status' => 'pending',
                 'created_at' => $invitation->created_at->diffForHumans(),
+                'is_online' => false,
+                'last_seen' => '-',
             ]);
 
         $teams = $members->concat($invitations);

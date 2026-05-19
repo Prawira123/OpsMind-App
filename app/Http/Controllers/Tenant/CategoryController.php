@@ -8,13 +8,17 @@ use App\Http\Requests\Category\CategoryUpdateRequest;
 use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function index(){
-        $categories = Category::all();
+        $tenantId = Auth::user()->tenant_id;
+        $categories = Cache::remember("tenant_{$tenantId}:category:all", now()->addDay(), function () {
+            return Category::all();
+        });
 
         return Inertia::render('Category/index', [
             'categories' => Inertia::defer(fn () => $categories),
