@@ -1,12 +1,22 @@
 <script setup>
-import { ref } from 'vue'
-import { Head, useForm, router } from '@inertiajs/vue3'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { Head, useForm, router, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
+import Echo from 'laravel-echo'
+import Pusher from 'pusher-js'
 
 const props = defineProps({
     members: Array
 })
+
+const page = usePage()
+const currentUser = computed(() => page.props.auth.user)
+const localMembers = ref([...props.members])
+
+watch(() => props.members, (newVal) => {
+    localMembers.value = [...newVal]
+}, { deep: true })
 
 const showInviteModal = ref(false)
 const inviteForm = useForm({
@@ -61,6 +71,71 @@ const getStatusColor = (status) => {
         ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
         : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
 }
+
+let presenceChannel = null
+
+const setupPresence = () => {
+    if (!window.Echo) {
+        window.Pusher = Pusher
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: import.meta.env.VITE_REVERB_APP_KEY,
+            wsHost: import.meta.env.VITE_REVERB_HOST === 'localhost' ? '127.0.0.1' : (import.meta.env.VITE_REVERB_HOST || window.location.hostname),
+            wsPort: import.meta.env.VITE_REVERB_PORT || 8080,
+            wssPort: import.meta.env.VITE_REVERB_PORT || 8080,
+            forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+            enabledTransports: ['ws', 'wss'],
+        })
+    }
+
+    const tenantId = currentUser.value.tenant_id
+    if (tenantId) {
+        presenceChannel = window.Echo.join(`tenant.${tenantId}.presence`)
+
+        presenceChannel.here((users) => {
+            const onlineIds = users.map(u => u.id)
+            localMembers.value.forEach(m => {
+                if (m.status === 'active') {
+                    const isOnline = onlineIds.includes(m.id)
+                    m.is_online = isOnline
+                    if (isOnline) {
+                        m.last_seen = '-'
+                    }
+                }
+            })
+        })
+
+        presenceChannel.joining((user) => {
+            const idx = localMembers.value.findIndex(m => m.id === user.id)
+            if (idx !== -1) {
+                localMembers.value[idx].is_online = true
+                localMembers.value[idx].last_seen = '-'
+            }
+        })
+
+        presenceChannel.leaving((user) => {
+            const idx = localMembers.value.findIndex(m => m.id === user.id)
+            if (idx !== -1) {
+                localMembers.value[idx].is_online = false
+                localMembers.value[idx].last_seen = 'Baru saja'
+            }
+        })
+    }
+}
+
+onMounted(() => {
+    setupPresence()
+})
+
+onUnmounted(() => {
+    if (presenceChannel) {
+        const tenantId = currentUser.value.tenant_id
+        if (tenantId) {
+            window.Echo.leave(`tenant.${tenantId}.presence`)
+        }
+        presenceChannel = null
+    }
+})
 </script>
 
 <template>
@@ -102,7 +177,7 @@ const getStatusColor = (status) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                            <tr v-for="member in members" :key="member.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                            <tr v-for="member in localMembers" :key="member.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                 <td class="px-6 py-5">
                                     <div class="flex items-center gap-4">
                                         <div v-if="member.avatar" class="h-10 w-10 rounded-full bg-cover bg-center" :style="{ backgroundImage: `url(${member.avatar})` }" />
@@ -141,7 +216,17 @@ const getStatusColor = (status) => {
                                 <td class="px-6 py-5 text-sm text-gray-500 dark:text-gray-400">
                                     {{ member.last_seen }}
                                 </td>
-                                <td class="px-6 py-5 text-right">
+                                <td class="px-6 py-5 text-right flex items-center justify-end gap-2">
+                                    <Link 
+                                        v-if="member.status === 'active' && member.id !== $page.props.auth.user.id" 
+                                        :href="route('chat.start-with-user', member.id)" 
+                                        class="text-gray-400 hover:text-indigo-600 transition-colors p-2"
+                                        title="Chat"
+                                    >
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                    </Link>
                                     <button @click="deleteMember(member.id)" class="text-gray-400 hover:text-red-500 transition-colors p-2">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

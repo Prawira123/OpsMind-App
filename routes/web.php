@@ -14,6 +14,7 @@ use App\Http\Controllers\Tenant\LaporanController;
 use App\Http\Controllers\Tenant\NotificationController;
 use App\Http\Controllers\Tenant\TransactionController;
 use App\Http\Controllers\TenantInvitationController;
+use App\Http\Controllers\Tenant\MessageChatController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -128,6 +129,18 @@ Route::middleware(['auth', 'otpVerified', 'tenantExists', 'setCurrentTenant', 'S
     //AI Route
     Route::get('ai', [AIController::class, 'index'])->name('ai.index');
     Route::post('ai/chat', [AIController::class, 'chat'])->name('ai.chat');
+
+    // Chat & Messages Route
+    Route::prefix('chat')->group(function () {
+        Route::get('/', [MessageChatController::class, 'index'])->name('chat.index');
+        Route::get('user/{userId}', [MessageChatController::class, 'startChatWithUser'])->name('chat.start-with-user');
+        Route::get('{conversation}', [MessageChatController::class, 'show'])->name('chat.show');
+
+        Route::post('conversations/private', [MessageChatController::class, 'makeConversationPrivate'])->name('chat.conversations.private');
+        Route::post('messages', [MessageChatController::class, 'storeMessage'])->name('chat.messages.store');
+        Route::post('messages/deliveries', [MessageChatController::class, 'storeDeliveryMessage'])->name('chat.messages.delivery');
+        Route::post('messages/reads', [MessageChatController::class, 'storeReadMessage'])->name('chat.messages.read');
+    });
 });
 
 require __DIR__ . '/auth.php';
