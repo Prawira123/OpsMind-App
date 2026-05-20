@@ -21,6 +21,7 @@ const newMessageText = ref('')
 const searchGroup = ref('')
 const messagesContainer = ref(null)
 const isSending = ref(false)
+const partnerIsTyping = ref(false)
 
 // UI state for popups/dropdowns
 const showDocPopup = ref(false)
@@ -97,6 +98,23 @@ const formatSize = (bytes) => {
     if (kb < 1024) return `${kb.toFixed(1)} KB`
     const mb = kb / 1024
     return `${mb.toFixed(1)} MB`
+}
+
+let typingIsTimeOut = null
+const handleTyping = () => {
+    activeChannel.whisper('typing', {
+        user_id: currentUser.value.id,
+        is_typing : true
+    })
+
+    clearTimeout(typingIsTimeOut)
+
+    typingIsTimeOut = setTimeout(() => {
+        activeChannel.whisper('typing', {
+            user_id : currentUser.value.id,
+            is_typing : false
+        })
+    }, 2000)
 }
 
 // Send a message
@@ -217,7 +235,7 @@ const setupWebSocket = () => {
                     // Send delivery and read status to server immediately
                     axios.post(route('chat.messages.delivery'), { message_id: payload.id })
                     axios.post(route('chat.messages.read'), { message_id: payload.id })
-                }
+                } 
             }
         })
 
@@ -233,6 +251,12 @@ const setupWebSocket = () => {
             if (msg && msg.is_me && msg.status !== 'read') {
                 msg.status = 'delivered'
             }
+        })
+
+        // Listen for typing whisper
+        activeChannel.listenForWhisper('typing', (e) => {
+            partnerIsTyping.value = e.is_typing
+            scrollToBottom()
         })
     }
 
@@ -319,6 +343,7 @@ const leaveAllChannels = () => {
 
 // Watch active conversation ID to switch channels
 watch(() => props.activeConversationId, () => {
+    partnerIsTyping.value = false
     setupWebSocket()
     scrollToBottom()
 })
@@ -412,7 +437,7 @@ onUnmounted(() => {
                             <div class="absolute right-4 bottom-3 flex items-center gap-1.5">
                                 <span 
                                     v-if="convo.unread_count > 0" 
-                                    class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-2xs font-bold bg-indigo-600 text-white"
+                                    class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white mt-2"
                                 >
                                     {{ convo.unread_count }}
                                 </span>
@@ -432,7 +457,7 @@ onUnmounted(() => {
                                     <!-- Sidebar Dropdown Menu -->
                                     <div 
                                         v-if="activeSidebarMenuId === convo.id"
-                                        class="absolute right-0 bottom-7 z-50 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 animate-in fade-in duration-100"
+                                        class="absolute right-0 top-8 z-50 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 animate-in fade-in duration-100"
                                     >
                                         <button 
                                             type="button"
@@ -651,6 +676,17 @@ onUnmounted(() => {
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Bouncing Dots Typing Indicator -->
+                            <div v-if="partnerIsTyping" class="flex justify-start animate-in fade-in duration-200">
+                                <div class="max-w-[70%] flex flex-col items-start">
+                                    <div class="px-4 py-2.5 rounded-2xl rounded-bl-none text-sm bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700/40 shadow-sm flex items-center gap-1.5">
+                                        <span class="h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce" style="animation-delay: 0ms"></span>
+                                        <span class="h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce" style="animation-delay: 150ms"></span>
+                                        <span class="h-2 w-2 rounded-full bg-gray-400 dark:bg-gray-500 animate-bounce" style="animation-delay: 300ms"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Chat Input Area -->
@@ -719,6 +755,7 @@ onUnmounted(() => {
                                         v-model="newMessageText"
                                         rows="1"
                                         placeholder="Ketik pesan Anda di sini..." 
+                                        @input="handleTyping()"
                                         @keydown.enter.prevent="sendMessage"
                                         class="w-full resize-none rounded-xl pl-4 pr-12 py-3 text-sm border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder-gray-400 dark:placeholder-gray-500"
                                     ></textarea>
